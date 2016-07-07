@@ -1,0 +1,37 @@
+% General stepping algorithm for psychometric functions
+% Create row vector of zeroes to store user input
+participant_row = zeros(1);
+
+% Use count to advance position in row vector to avoid rewriting data
+count = 1;
+% Create dialog box to enter participant number in
+prompt = {'Enter Participant Number:'}; % Citation: dialog box code found on: http://www.mathworks.com/help/matlab/ref/inputdlg.html?refresh=true, last access was November 26th 2015
+dlg_title = 'Participant Number';
+num_lines = 1;
+answer = inputdlg(prompt,dlg_title,num_lines);
+% Convert participant number from a character into a number
+participant_number = str2double(answer{1});
+% Ensure that participant number is a number and not a NaN
+if isfinite(participant_number)
+    participant_row(count) = participant_number;
+else
+    error('Participant Number must be a number')
+end
+% Possible have a separate script that emalgamates each participant
+% together 
+Main_Screen = 0; % Citation: screen set up, text descriptions and flips found on exampleExperiment.m by Dr. David Hunter
+% Disable VBL sync tests because they are not relevant anymore, ignore the
+% massive warning sign that occurs in presentation
+Screen('Preference', 'SkipSyncTests',1);
+window = Screen(Main_Screen, 'OpenWindow');
+
+% Make screen white and set text specifications
+Screen(window,'FillRect',[ 255 255 255 255]);
+Screen('TextFont',window, 'Courier New');
+Screen('TextSize',window, 14);
+Screen('TextStyle', window, 1+2);
+DrawFormattedText(window, 10, 20, [0 0 0 255], 40);
+
+% Make screen visible and show for 10 seconds 
+Screen('Flip', window);
+WaitSecs(10);
