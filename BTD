@@ -18,8 +18,7 @@ else
     error('Participant Number must be a number')
 end
 time_interval = .5;% Can be changed to suit specific experiment parameters
-% need to put in loop
-% count = count + 1;
+
 % Possible have a separate script that emalgamates each participant
 % together 
 % Do I need all the stuff below if using QUEST? 
@@ -29,8 +28,8 @@ height = 200;
 depth = 3;
 noImages = 5;
 KbName('UnifyKeyNames');
-oneKey = KbName('1!');
-twoKey = KbName('2@');
+leftKey = KbName('LeftArrow');
+rightKey = KbName('RightArrow');
 quitKey = KbName('ESCAPE');
 % Set directory for Matlab to find faces
 pictures = dir('C:\Users\shoot\OneDrive\Documents\MATLAB\*.png');
@@ -53,7 +52,63 @@ Screen(window,'FillRect',[ 255 255 255 255]);
 % DrawFormattedText(window, 10, 20, [0 0 0 255], 40);
 
 % Make screen visible and show for 10 seconds 
-% Screen('Flip', window);
-% WaitSecs(10);
+Screen('Flip', window);
+WaitSecs(10);
 
+% Restrict keypresses to only the numbers and the Esc key
+RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
 
+% need to put in loop
+count = count + 1;
+%Sets the units of your root object (screen) to pixels
+set(0,'units','pixels')  
+%Obtains this pixel information
+Pix_SS = get(0,'screensize');
+left_location(Pix_SS) = (Pix_SS(:,:,
+for currentStimulus = Index(1:200); % Can change amount of stimuli here
+    images = imread(FileList{currentStimulus});
+    participant_row(count)= currentStimulus;
+    count = count + 1;
+    % Turns screen black, sets location of the image
+    Screen(window,'FillRect', [ 0 0 0 0]);
+    rect= [ 0 0 width height];
+    Screen(window, 'PutImage', images, rect);
+ 
+    % Get time of stimulus onset
+    secs0 = GetSecs; % Citation: calculating RT by Rachel Cooper under 'Creating experiments using Matlab and Psychtoolbox' accessed November 17th 2015, can be found on: https://www.academia.edu/2614964/Creating_experiments_using_Matlab_and_Psychtoolbox
+    % Make screen visible to participant, wait specified amount of seconds
+    % on each face
+    Screen('Flip', window);
+    WaitSecs(time_interval);
+    
+    % Wait for keypress and release, only accurate to the nearest 5ms,
+    % record time until keypress and which key was pressed
+    KbWait;
+    [keyIsDown, secs, keyCode] = KbCheck;% Citation: Rachel Cooper, accessed November 17th 2015, see full citation above. Modified, deleted deltasecs
+    
+    % Convert keycode to common number
+    if keyCode(oneKey)
+        KeyNumber = 1;
+    elseif keyCode(twoKey)
+        KeyNumber = 2;
+    elseif keyCode(threeKey)
+        KeyNumber = 3;
+    elseif keyCode(fourKey)
+        KeyNumber = 4;
+    elseif keyCode(fiveKey)
+        KeyNumber = 5;
+    elseif keyCode(sixKey)
+        KeyNumber = 6;
+    elseif keyCode(sevenKey)
+        KeyNumber = 7;
+    elseif keyCode(eightKey)
+        KeyNumber = 8;
+    elseif keyCode(nineKey)
+        KeyNumber = 9;
+    elseif keyCode(quitKey)
+        % If Esc pressed, data for that trial will not be saved, will quit
+        % back to Matlab and indicate that the quit key was pressed
+        Screen('CloseAll');
+        error('User hit the quit key');
+    end
+end
