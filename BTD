@@ -20,9 +20,10 @@ end
 time_interval = .5;% Can be changed to suit specific experiment parameters
 
 % Possible have a separate script that emalgamates each participant
-% together 
-% Do I need all the stuff below if using QUEST? 
+% together
+% Do I need all the stuff below if using QUEST?
 % Display faces and assign keys their names
+trial_number = 200;
 width = 300; % Citation: image description and naming keys found on exampleExperiment.m from Dr. David Hunter
 height = 200;
 depth = 3;
@@ -31,11 +32,15 @@ KbName('UnifyKeyNames');
 leftKey = KbName('LeftArrow');
 rightKey = KbName('RightArrow');
 quitKey = KbName('ESCAPE');
+% Draw a circle
+pos = [2 4 2 2];
+circle = rectangle('Position',pos,'Curvature',[1 1],'FaceColor',[0 .5 .5]);
+axis equal
 % Set directory for Matlab to find faces
-pictures = dir('C:\Users\shoot\OneDrive\Documents\MATLAB\*.png');
+%pictures = dir('C:\Users\shoot\OneDrive\Documents\MATLAB\*.png');
 % Tell Matlab to only look for the names of the faces rather than other
 % extraneous data
-FileList = {pictures.name};
+%FileList = {pictures.name};
 % Randomize faces throughout the whole database of faces
 
 Main_Screen = 0; % Citation: screen set up, text descriptions and flips found on exampleExperiment.m by Dr. David Hunter
@@ -51,7 +56,7 @@ Screen(window,'FillRect',[ 255 255 255 255]);
 % Screen('TextStyle', window, 1+2);
 % DrawFormattedText(window, 10, 20, [0 0 0 255], 40);
 
-% Make screen visible and show for 10 seconds 
+% Make screen visible and show for 10 seconds
 Screen('Flip', window);
 WaitSecs(10);
 
@@ -61,19 +66,31 @@ RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
 % need to put in loop
 count = count + 1;
 %Sets the units of your root object (screen) to pixels
-set(0,'units','pixels')  
+%set(0,'units','pixels')
 %Obtains this pixel information
-Pix_SS = get(0,'screensize');
-left_location(Pix_SS) = (Pix_SS(:,:,
-for currentStimulus = Index(1:200); % Can change amount of stimuli here
-    images = imread(FileList{currentStimulus});
+%Pix_SS = get(0,'screensize');
+%left_location(Pix_SS) = (Pix_SS(:,:,
+
+for currentStimulus = Index(1:trial_number); % Can change amount of stimuli here
+    %images = imread(FileList{currentStimulus});
+    randperm(2,1);
+    
     participant_row(count)= currentStimulus;
     count = count + 1;
     % Turns screen black, sets location of the image
     Screen(window,'FillRect', [ 0 0 0 0]);
     rect= [ 0 0 width height];
-    Screen(window, 'PutImage', images, rect);
- 
+    % default first stimulus, randomly chooses number from 1 to 2, if 1
+    % then goes to the right, if 2 then goes to the left
+    if randperm < 2
+        pos = [ 5 4 2 2];
+    else
+        pos = [2 4 2 2];
+    end
+    circle = rectangle('Position',pos,'Curvature',[1 1],'FaceColor',[0 .5 .5]);
+    axis equal
+    Screen(window, 'PutImage', circle, rect);
+    
     % Get time of stimulus onset
     secs0 = GetSecs; % Citation: calculating RT by Rachel Cooper under 'Creating experiments using Matlab and Psychtoolbox' accessed November 17th 2015, can be found on: https://www.academia.edu/2614964/Creating_experiments_using_Matlab_and_Psychtoolbox
     % Make screen visible to participant, wait specified amount of seconds
@@ -87,28 +104,25 @@ for currentStimulus = Index(1:200); % Can change amount of stimuli here
     [keyIsDown, secs, keyCode] = KbCheck;% Citation: Rachel Cooper, accessed November 17th 2015, see full citation above. Modified, deleted deltasecs
     
     % Convert keycode to common number
-    if keyCode(oneKey)
-        KeyNumber = 1;
-    elseif keyCode(twoKey)
-        KeyNumber = 2;
-    elseif keyCode(threeKey)
-        KeyNumber = 3;
-    elseif keyCode(fourKey)
-        KeyNumber = 4;
-    elseif keyCode(fiveKey)
-        KeyNumber = 5;
-    elseif keyCode(sixKey)
-        KeyNumber = 6;
-    elseif keyCode(sevenKey)
-        KeyNumber = 7;
-    elseif keyCode(eightKey)
-        KeyNumber = 8;
-    elseif keyCode(nineKey)
-        KeyNumber = 9;
+    
+    % If Esc pressed, data for that trial will not be saved, will quit
+    % back to Matlab and indicate that the quit key was pressed
+    if keyCode(leftKey)
+        % stores the user response accosiated with the image.
+        response(currenStimulus) = left;
+    elseif keyCode(rightKey)
+        response(currentStimulus) = right;
+     % if the false key was pressed
     elseif keyCode(quitKey)
-        % If Esc pressed, data for that trial will not be saved, will quit
-        % back to Matlab and indicate that the quit key was pressed
         Screen('CloseAll');
         error('User hit the quit key');
     end
+    %Citation, for RT calculation as well: Rachel Cooper, accessed November 17th 2015, see full citation above
+    RT = secs - secs0;
+    % Assign values into growing row vector
+    participant_row(count) = response;
+    count = count + 1;
+    participant_row(count) = RT;
+    count = count + 1;
 end
+
