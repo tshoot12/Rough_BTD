@@ -32,10 +32,7 @@ KbName('UnifyKeyNames');
 leftKey = KbName('LeftArrow');
 rightKey = KbName('RightArrow');
 quitKey = KbName('ESCAPE');
-% Draw a circle
-pos = [2 4 2 2];
-circle = rectangle('Position',pos,'Curvature',[1 1],'FaceColor',[0 .5 .5]);
-axis equal
+
 % Set directory for Matlab to find faces
 %pictures = dir('C:\Users\shoot\OneDrive\Documents\MATLAB\*.png');
 % Tell Matlab to only look for the names of the faces rather than other
@@ -44,9 +41,7 @@ axis equal
 % Randomize faces throughout the whole database of faces
 
 Main_Screen = 0; % Citation: screen set up, text descriptions and flips found on exampleExperiment.m by Dr. David Hunter
-% Disable VBL sync tests because they are not relevant anymore, ignore the
-% massive warning sign that occurs in presentation
-Screen('Preference', 'SkipSyncTests',1);
+Screen('Preference', 'SkipSyncTests',0);
 window = Screen(Main_Screen, 'OpenWindow');
 
 % Make screen white and set text specifications
@@ -70,11 +65,38 @@ count = count + 1;
 %Obtains this pixel information
 %Pix_SS = get(0,'screensize');
 %left_location(Pix_SS) = (Pix_SS(:,:,
+% Draw some framed and filled rects. We define the bounding rectangles
+% [left, top, right, bottom] of the rectangles:
+% r1=[0 0 100 100];
 
-for currentStimulus = Index(1:trial_number); % Can change amount of stimuli here
+% Helper functions (help PsychRects) allow to manipulate rectangles,
+% e.g., shift a rect 'r1' around by an x,y offset:
+
+%r3=OffsetRect(r1, 300,200);
+%r2=OffsetRect([0 0 160 80], 10,150);
+%r3=OffsetRect([0 0 260 80], 10,150);
+[wPtr,rect] = Screen('OpenWindow',1);
+screenWidth = rect(3);
+screenHeight = rect(4);
+screenCenterX = screenWidth/2;
+screenCenterY = screenHeight/2;
+
+myRectWidth = 100;
+myRectHeight = 100;
+
+myRectLeft = screenCenterX - myRectWidth/2;
+myRectTop = screenCenterY - myRectHeight/2;
+myRectRight = myRectLeft + myRectWidth;
+myRectBottom = myRectTop + myRectHeight;
+myRect = [myRectLeft, myRectTop, myRectRight, myRectLeft];
+
+Screen('FillRect',wPtr,[0 0 255],myRect);
+Screen('Flip',wPtr);
+
+
+for currentStimulus = trial_number; % Can change amount of stimuli here
     %images = imread(FileList{currentStimulus});
-    randperm(2,1);
-    
+    default = randperm(2,1);
     participant_row(count)= currentStimulus;
     count = count + 1;
     % Turns screen black, sets location of the image
@@ -82,14 +104,13 @@ for currentStimulus = Index(1:trial_number); % Can change amount of stimuli here
     rect= [ 0 0 width height];
     % default first stimulus, randomly chooses number from 1 to 2, if 1
     % then goes to the right, if 2 then goes to the left
-    if randperm < 2
-        pos = [ 5 4 2 2];
+    if default < 2
+        oval = Screen('FillOval', win, [0.0, 0.5, 0.8], r2);
     else
-        pos = [2 4 2 2];
+        oval = Screen('FillOval', win, [0.0, 0.5, 0.8], r3);
     end
-    circle = rectangle('Position',pos,'Curvature',[1 1],'FaceColor',[0 .5 .5]);
-    axis equal
-    Screen(window, 'PutImage', circle, rect);
+    
+    Screen(window, 'PutImage', oval, rect);
     
     % Get time of stimulus onset
     secs0 = GetSecs; % Citation: calculating RT by Rachel Cooper under 'Creating experiments using Matlab and Psychtoolbox' accessed November 17th 2015, can be found on: https://www.academia.edu/2614964/Creating_experiments_using_Matlab_and_Psychtoolbox
@@ -112,7 +133,7 @@ for currentStimulus = Index(1:trial_number); % Can change amount of stimuli here
         response(currenStimulus) = left;
     elseif keyCode(rightKey)
         response(currentStimulus) = right;
-     % if the false key was pressed
+        % if the false key was pressed
     elseif keyCode(quitKey)
         Screen('CloseAll');
         error('User hit the quit key');
