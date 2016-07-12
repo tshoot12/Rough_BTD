@@ -1,9 +1,9 @@
 % General stepping algorithm for psychometric functions
 % Create row vector of zeroes to store user input
-participant_row = zeros(1);
+participant_row = zeros(1,5);
 
 % Use count to advance position in row vector to avoid rewriting data
-count = 1;
+%count = 1;
 % Create dialog box to enter participant number in
 prompt = {'Enter Participant Number:'}; % Citation: dialog box code found on: http://www.mathworks.com/help/matlab/ref/inputdlg.html?refresh=true, last access was November 26th 2015
 dlg_title = 'Participant Number';
@@ -13,70 +13,28 @@ answer = inputdlg(prompt,dlg_title,num_lines);
 participant_number = str2double(answer{1});
 % Ensure that participant number is a number and not a NaN
 if isfinite(participant_number)
-    participant_row(count) = participant_number;
+    participant_row(1) = participant_number;
 else
     error('Participant Number must be a number')
 end
-time_interval = .5;% Can be changed to suit specific experiment parameters
+time_interval = 10;% Can be changed to suit specific experiment parameters
 
 % Possible have a separate script that emalgamates each participant
 % together
-% Do I need all the stuff below if using QUEST?
-% Display faces and assign keys their names
-%trial_number = 200;
-%width = 300; % Citation: image description and naming keys found on exampleExperiment.m from Dr. David Hunter
-%height = 200;
-%depth = 3;
-%noImages = 5;
 KbName('UnifyKeyNames');
 leftKey = KbName('LeftArrow');
 rightKey = KbName('RightArrow');
 quitKey = KbName('ESCAPE');
 %% create a new responses variable ( a vector of length noImages to store
 % one responce per image
-response = char(1,2);
-% Set directory for Matlab to find faces
-%pictures = dir('C:\Users\shoot\OneDrive\Documents\MATLAB\*.png');
-% Tell Matlab to only look for the names of the faces rather than other
-% extraneous data
-%FileList = {pictures.name};
-% Randomize faces throughout the whole database of faces
+response = char(1);
 
 Main_Screen = 0; % Citation: screen set up, text descriptions and flips found on exampleExperiment.m by Dr. David Hunter
 Screen('Preference', 'SkipSyncTests',0);
-%window = Screen(Main_Screen, 'OpenWindow');
-
-% Make screen white and set text specifications
-%Screen(window,'FillRect',[ 255 255 255 255]);
-% Screen('TextFont',window, 'Courier New');
-% Screen('TextSize',window, 14);
-% Screen('TextStyle', window, 1+2);
-% DrawFormattedText(window, 10, 20, [0 0 0 255], 40);
-
-% Make screen visible and show for 10 seconds
-%Screen('Flip', window);
-%WaitSecs(10);
 
 % Restrict keypresses to only the numbers and the Esc key
 RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
-
-% need to put in loop
-count = count + 1;
-%Sets the units of your root object (screen) to pixels
-%set(0,'units','pixels')
-%Obtains this pixel information
-%Pix_SS = get(0,'screensize');
-%left_location(Pix_SS) = (Pix_SS(:,:,
-% Draw some framed and filled rects. We define the bounding rectangles
-% [left, top, right, bottom] of the rectangles:
-% r1=[0 0 100 100];
-
-% Helper functions (help PsychRects) allow to manipulate rectangles,
-% e.g., shift a rect 'r1' around by an x,y offset:
-
-%r3=OffsetRect(r1, 300,200);
-%r2=OffsetRect([0 0 160 80], 10,150);
-%r3=OffsetRect([0 0 260 80], 10,150);
+% Figures out screen resolution and calculates how to centre a shape
 [wPtr,rect] = Screen('OpenWindow',0);
 screenWidth = rect(3);
 screenHeight = rect(4);
@@ -93,15 +51,11 @@ myRectBottom = myRectTop + myRectHeight;
 myRect = [myRectLeft, myRectTop, myRectRight, myRectBottom];
 
 
-%Screen('Flip',wPtr);
-
-
 
 
 for currentStimulus = 1:20; % Can change amount of stimuli here
-    %images = imread(FileList{currentStimulus});
     default = randperm(2,1);
-    participant_row(count)= currentStimulus;
+    participant_row(2)= currentStimulus;
     count = count + 1;
     % Turns screen black, sets location of the image
     Screen(window,'FillRect', [ 0 0 0 0]);
@@ -117,7 +71,7 @@ for currentStimulus = 1:20; % Can change amount of stimuli here
     Screen('FillRect',wPtr,[0 0 255],myRect)
     Screen('FillOval',wPtr,[255 0 0 ],myRect)
     Screen('Flip',wPtr);
-    
+    participant_row(3) = default;
     % Get time of stimulus onset
     
     % Make screen visible to participant, wait specified amount of seconds
@@ -131,16 +85,14 @@ for currentStimulus = 1:20; % Can change amount of stimuli here
     KbWait;
     [keyIsDown, secs, keyCode] = KbCheck;% Citation: Rachel Cooper, accessed November 17th 2015, see full citation above. Modified, deleted deltasecs
     
-    % Convert keycode to common number
     
     % If Esc pressed, data for that trial will not be saved, will quit
     % back to Matlab and indicate that the quit key was pressed
     if keyCode(leftKey)
-        % stores the user response accosiated with the image.
+        % stores the user response associated with the image.
         response(currentStimulus) = 'L';
     elseif keyCode(rightKey)
         response(currentStimulus) = 'R';
-        % if the false key was pressed
     elseif keyCode(quitKey)
         Screen('CloseAll');
         error('User hit the quit key');
@@ -148,9 +100,9 @@ for currentStimulus = 1:20; % Can change amount of stimuli here
     %Citation, for RT calculation as well: Rachel Cooper, accessed November 17th 2015, see full citation above
     RT = secs - secs0;
     % Assign values into growing row vector
-    participant_row(count) = currentStimulus;
-    count = count + 1;
-    participant_row(count) = RT;
-    count = count + 1; 
+    participant_row(4) = response;
+    %count = count + 1;
+    participant_row(5) = RT;
+    %count = count + 1; 
 end
 
