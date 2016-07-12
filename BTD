@@ -23,16 +23,18 @@ time_interval = .5;% Can be changed to suit specific experiment parameters
 % together
 % Do I need all the stuff below if using QUEST?
 % Display faces and assign keys their names
-trial_number = 200;
-width = 300; % Citation: image description and naming keys found on exampleExperiment.m from Dr. David Hunter
-height = 200;
-depth = 3;
-noImages = 5;
+%trial_number = 200;
+%width = 300; % Citation: image description and naming keys found on exampleExperiment.m from Dr. David Hunter
+%height = 200;
+%depth = 3;
+%noImages = 5;
 KbName('UnifyKeyNames');
 leftKey = KbName('LeftArrow');
 rightKey = KbName('RightArrow');
 quitKey = KbName('ESCAPE');
-
+%% create a new responses variable ( a vector of length noImages to store
+% one responce per image
+response = char(1,2);
 % Set directory for Matlab to find faces
 %pictures = dir('C:\Users\shoot\OneDrive\Documents\MATLAB\*.png');
 % Tell Matlab to only look for the names of the faces rather than other
@@ -42,18 +44,18 @@ quitKey = KbName('ESCAPE');
 
 Main_Screen = 0; % Citation: screen set up, text descriptions and flips found on exampleExperiment.m by Dr. David Hunter
 Screen('Preference', 'SkipSyncTests',0);
-window = Screen(Main_Screen, 'OpenWindow');
+%window = Screen(Main_Screen, 'OpenWindow');
 
 % Make screen white and set text specifications
-Screen(window,'FillRect',[ 255 255 255 255]);
+%Screen(window,'FillRect',[ 255 255 255 255]);
 % Screen('TextFont',window, 'Courier New');
 % Screen('TextSize',window, 14);
 % Screen('TextStyle', window, 1+2);
 % DrawFormattedText(window, 10, 20, [0 0 0 255], 40);
 
 % Make screen visible and show for 10 seconds
-Screen('Flip', window);
-WaitSecs(10);
+%Screen('Flip', window);
+%WaitSecs(10);
 
 % Restrict keypresses to only the numbers and the Esc key
 RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
@@ -75,7 +77,7 @@ count = count + 1;
 %r3=OffsetRect(r1, 300,200);
 %r2=OffsetRect([0 0 160 80], 10,150);
 %r3=OffsetRect([0 0 260 80], 10,150);
-[wPtr,rect] = Screen('OpenWindow',1);
+[wPtr,rect] = Screen('OpenWindow',0);
 screenWidth = rect(3);
 screenHeight = rect(4);
 screenCenterX = screenWidth/2;
@@ -88,13 +90,15 @@ myRectLeft = screenCenterX - myRectWidth/2;
 myRectTop = screenCenterY - myRectHeight/2;
 myRectRight = myRectLeft + myRectWidth;
 myRectBottom = myRectTop + myRectHeight;
-myRect = [myRectLeft, myRectTop, myRectRight, myRectLeft];
-
-Screen('FillRect',wPtr,[0 0 255],myRect);
-Screen('Flip',wPtr);
+myRect = [myRectLeft, myRectTop, myRectRight, myRectBottom];
 
 
-for currentStimulus = trial_number; % Can change amount of stimuli here
+%Screen('Flip',wPtr);
+
+
+
+
+for currentStimulus = 1:20; % Can change amount of stimuli here
     %images = imread(FileList{currentStimulus});
     default = randperm(2,1);
     participant_row(count)= currentStimulus;
@@ -105,22 +109,25 @@ for currentStimulus = trial_number; % Can change amount of stimuli here
     % default first stimulus, randomly chooses number from 1 to 2, if 1
     % then goes to the right, if 2 then goes to the left
     if default < 2
-        oval = Screen('FillOval', win, [0.0, 0.5, 0.8], r2);
+        myRect = [myRectLeft - 100, myRectTop, myRectRight - 100, myRectBottom];
     else
-        oval = Screen('FillOval', win, [0.0, 0.5, 0.8], r3);
+        myRect = [myRectLeft + 100, myRectTop, myRectRight + 100, myRectBottom];
     end
     
-    Screen(window, 'PutImage', oval, rect);
+    Screen('FillRect',wPtr,[0 0 255],myRect)
+    Screen('FillOval',wPtr,[255 0 0 ],myRect)
+    Screen('Flip',wPtr);
     
     % Get time of stimulus onset
-    secs0 = GetSecs; % Citation: calculating RT by Rachel Cooper under 'Creating experiments using Matlab and Psychtoolbox' accessed November 17th 2015, can be found on: https://www.academia.edu/2614964/Creating_experiments_using_Matlab_and_Psychtoolbox
+    
     % Make screen visible to participant, wait specified amount of seconds
     % on each face
-    Screen('Flip', window);
-    WaitSecs(time_interval);
     
+    secs0 = GetSecs; % Citation: calculating RT by Rachel Cooper under 'Creating experiments using Matlab and Psychtoolbox' accessed November 17th 2015, can be found on: https://www.academia.edu/2614964/Creating_experiments_using_Matlab_and_Psychtoolbox
     % Wait for keypress and release, only accurate to the nearest 5ms,
     % record time until keypress and which key was pressed
+    Screen('Flip', window);
+    WaitSecs(time_interval);
     KbWait;
     [keyIsDown, secs, keyCode] = KbCheck;% Citation: Rachel Cooper, accessed November 17th 2015, see full citation above. Modified, deleted deltasecs
     
@@ -130,9 +137,9 @@ for currentStimulus = trial_number; % Can change amount of stimuli here
     % back to Matlab and indicate that the quit key was pressed
     if keyCode(leftKey)
         % stores the user response accosiated with the image.
-        response(currenStimulus) = left;
+        response(currentStimulus) = 'L';
     elseif keyCode(rightKey)
-        response(currentStimulus) = right;
+        response(currentStimulus) = 'R';
         % if the false key was pressed
     elseif keyCode(quitKey)
         Screen('CloseAll');
@@ -141,9 +148,9 @@ for currentStimulus = trial_number; % Can change amount of stimuli here
     %Citation, for RT calculation as well: Rachel Cooper, accessed November 17th 2015, see full citation above
     RT = secs - secs0;
     % Assign values into growing row vector
-    participant_row(count) = response;
+    participant_row(count) = currentStimulus;
     count = count + 1;
     participant_row(count) = RT;
-    count = count + 1;
+    count = count + 1; 
 end
 
