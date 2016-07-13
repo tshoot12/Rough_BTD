@@ -17,7 +17,7 @@ if isfinite(participant_number)
 else
     error('Participant Number must be a number')
 end
-time_interval = 10;% Can be changed to suit specific experiment parameters
+time_interval = 30;% Can be changed to suit specific experiment parameters
 
 % Possible have a separate script that emalgamates each participant
 % together
@@ -25,12 +25,19 @@ KbName('UnifyKeyNames');
 leftKey = KbName('LeftArrow');
 rightKey = KbName('RightArrow');
 quitKey = KbName('ESCAPE');
-%% create a new responses variable ( a vector of length noImages to store
+%% create a new response variable ( a vector of length noImages to store
 % one responce per image
 response = char(1);
-
+%whichScreen = 0;
+% Get screen numbers
+screens = Screen('Screens');
+% Which screen to draw to
+screenNumber = max(screens);
+% Define black and white
+white = WhiteIndex(screenNumber);
+black = BlackIndex(screenNumber);
 Main_Screen = 0; % Citation: screen set up, text descriptions and flips found on exampleExperiment.m by Dr. David Hunter
-Screen('Preference', 'SkipSyncTests',0);
+Screen('Preference', 'SkipSyncTests',1);
 
 % Restrict keypresses to only the numbers and the Esc key
 RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
@@ -56,10 +63,10 @@ myRect = [myRectLeft, myRectTop, myRectRight, myRectBottom];
 for currentStimulus = 1:20; % Can change amount of stimuli here
     default = randperm(2,1);
     participant_row(2)= currentStimulus;
-    count = count + 1;
+    %count = count + 1;
     % Turns screen black, sets location of the image
-    Screen(window,'FillRect', [ 0 0 0 0]);
-    rect= [ 0 0 width height];
+    %Screen('FillRect',wPtr, [ 0 0 0 0]);
+    %rect= [ 0 0 width height];
     % default first stimulus, randomly chooses number from 1 to 2, if 1
     % then goes to the right, if 2 then goes to the left
     if default < 2
@@ -67,22 +74,23 @@ for currentStimulus = 1:20; % Can change amount of stimuli here
     else
         myRect = [myRectLeft + 100, myRectTop, myRectRight + 100, myRectBottom];
     end
-    
+    secs0 = GetSecs; % Citation: calculating RT by Rachel Cooper under 'Creating experiments using Matlab and Psychtoolbox' accessed November 17th 2015, can be found on: https://www.academia.edu/2614964/Creating_experiments_using_Matlab_and_Psychtoolbox
+    % Wait for keypress and release, only accurate to the nearest 5ms,
+    % record time until keypress and which key was pressed
     Screen('FillRect',wPtr,[0 0 255],myRect)
     Screen('FillOval',wPtr,[255 0 0 ],myRect)
     Screen('Flip',wPtr);
+    KbWait;
     participant_row(3) = default;
     % Get time of stimulus onset
     
     % Make screen visible to participant, wait specified amount of seconds
     % on each face
     
-    secs0 = GetSecs; % Citation: calculating RT by Rachel Cooper under 'Creating experiments using Matlab and Psychtoolbox' accessed November 17th 2015, can be found on: https://www.academia.edu/2614964/Creating_experiments_using_Matlab_and_Psychtoolbox
-    % Wait for keypress and release, only accurate to the nearest 5ms,
-    % record time until keypress and which key was pressed
-    Screen('Flip', window);
-    WaitSecs(time_interval);
-    KbWait;
+    
+    %Screen('Flip', window);
+    %WaitSecs(time_interval);
+    %KbWait;
     [keyIsDown, secs, keyCode] = KbCheck;% Citation: Rachel Cooper, accessed November 17th 2015, see full citation above. Modified, deleted deltasecs
     
     
