@@ -1,6 +1,6 @@
 % General stepping algorithm for psychometric functions
 % Create an array of zeroes to store user input
-trial_number = 20;
+trial_number = 50;
 trial_row = zeros(trial_number,4);
 
 % Use count to advance position in row vector to avoid rewriting data
@@ -18,7 +18,7 @@ if isfinite(participant_number)
 else
     error('Participant Number must be a number')
 end
-time_interval = 30;% Can be changed to suit specific experiment parameters
+time_interval = 10;% Can be changed to suit specific experiment parameters
 
 % Possible have a separate script that emalgamates each participant
 % together
@@ -43,7 +43,7 @@ Main_Screen = 0; % Citation: screen set up, text descriptions and flips found on
 Screen('Preference', 'SkipSyncTests',1);
 
 % Restrict keypresses to only the numbers and the Esc key
-RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
+
 % Figures out screen resolution and calculates how to centre a shape
 [wPtr,rect] = Screen('OpenWindow',0);
 screenWidth = rect(3);
@@ -71,6 +71,7 @@ for currentStimulus = 1:trial_number; % Can change amount of stimuli here
     % Turns screen black, sets location of the image
     %Screen('FillRect',wPtr, [ 0 0 0 0]);
     %rect= [ 0 0 width height];
+    
     % default first stimulus, randomly chooses number from 1 to 2, if 1
     % then goes to the right, if 2 then goes to the left
     if default < 2
@@ -84,7 +85,9 @@ for currentStimulus = 1:trial_number; % Can change amount of stimuli here
     Screen('FillRect',wPtr,[0 0 255],myRect)
     Screen('FillOval',wPtr,[255 0 0 ],myRect)
     Screen('Flip',wPtr);
+    RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
     KbWait;
+    %WaitSecs(time_interval);
     trial_row(currentStimulus,2) = default;
     % Get time of stimulus onset
     
@@ -115,6 +118,7 @@ for currentStimulus = 1:trial_number; % Can change amount of stimuli here
     trial_row(currentStimulus,3) = response;
     %count = count + 1;
     trial_row(currentStimulus,4) = RT;
+    
   
     %count = count + 1; 
     
@@ -134,7 +138,7 @@ Screen('Flip', wPtr);
 
 % Restrict keypresses to the enter/return key, wait for keypress
 RestrictKeysForKbCheck(enterKey);
-KbWait
+KbPressWait
 % Close Psychtoolbox
 Screen('CloseAll')
 
