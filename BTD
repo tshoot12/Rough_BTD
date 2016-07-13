@@ -26,6 +26,8 @@ KbName('UnifyKeyNames');
 leftKey = KbName('LeftArrow');
 rightKey = KbName('RightArrow');
 quitKey = KbName('ESCAPE');
+enterKey = KbName('return');
+
 %% create a new response variable ( a vector of length noImages to store
 % one responce per image
 response = double(1);
@@ -117,4 +119,22 @@ for currentStimulus = 1:trial_number; % Can change amount of stimuli here
     %count = count + 1; 
     
 end
+% Debrief message after experiment is complete
+debrief = 'The experiment is now over press enter to quit back to Matlab.';
+
+% White screen with specified text values
+Screen('FillRect',wPtr,[ 255 255 255 255]); % Citation, text, restricting keys and screen: exampleExperiment.m by Dr. David Hunter
+Screen('TextFont',wPtr, 'Courier New');
+Screen('TextSize',wPtr, 14);
+Screen('TextStyle', wPtr, 1+2);
+DrawFormattedText(wPtr, debrief, 10, 20, [0 0 0 255], 40);
+
+% Bring screen from the back to the front so the participant can see it
+Screen('Flip', wPtr);
+
+% Restrict keypresses to the enter/return key, wait for keypress
+RestrictKeysForKbCheck(enterKey);
+KbWait
+% Close Psychtoolbox
+Screen('CloseAll')
 
