@@ -1,6 +1,7 @@
 % General stepping algorithm for psychometric functions
-% Create row vector of zeroes to store user input
-participant_row = zeros(1,5);
+% Create an array of zeroes to store user input
+trial_number = 20;
+trial_row = zeros(trial_number,4);
 
 % Use count to advance position in row vector to avoid rewriting data
 %count = 1;
@@ -13,7 +14,7 @@ answer = inputdlg(prompt,dlg_title,num_lines);
 participant_number = str2double(answer{1});
 % Ensure that participant number is a number and not a NaN
 if isfinite(participant_number)
-    participant_row(1) = participant_number;
+    participant_row = participant_number;
 else
     error('Participant Number must be a number')
 end
@@ -27,7 +28,7 @@ rightKey = KbName('RightArrow');
 quitKey = KbName('ESCAPE');
 %% create a new response variable ( a vector of length noImages to store
 % one responce per image
-response = char(1);
+response = double(1);
 %whichScreen = 0;
 % Get screen numbers
 screens = Screen('Screens');
@@ -60,9 +61,10 @@ myRect = [myRectLeft, myRectTop, myRectRight, myRectBottom];
 
 
 
-for currentStimulus = 1:20; % Can change amount of stimuli here
+for currentStimulus = 1:trial_number; % Can change amount of stimuli here
     default = randperm(2,1);
-    participant_row(2)= currentStimulus;
+    %trial_row(currentStimulus,:); 
+    trial_row(currentStimulus,1)= currentStimulus;
     %count = count + 1;
     % Turns screen black, sets location of the image
     %Screen('FillRect',wPtr, [ 0 0 0 0]);
@@ -81,7 +83,7 @@ for currentStimulus = 1:20; % Can change amount of stimuli here
     Screen('FillOval',wPtr,[255 0 0 ],myRect)
     Screen('Flip',wPtr);
     KbWait;
-    participant_row(3) = default;
+    trial_row(currentStimulus,2) = default;
     % Get time of stimulus onset
     
     % Make screen visible to participant, wait specified amount of seconds
@@ -97,10 +99,10 @@ for currentStimulus = 1:20; % Can change amount of stimuli here
     % If Esc pressed, data for that trial will not be saved, will quit
     % back to Matlab and indicate that the quit key was pressed
     if keyCode(leftKey)
-        % stores the user response associated with the image.
-        response(currentStimulus) = 'L';
+        % stores the user response associated with direction of stimulus, 7 = left, 8 = right.
+        response = 7;
     elseif keyCode(rightKey)
-        response(currentStimulus) = 'R';
+        response = 8;
     elseif keyCode(quitKey)
         Screen('CloseAll');
         error('User hit the quit key');
@@ -108,9 +110,11 @@ for currentStimulus = 1:20; % Can change amount of stimuli here
     %Citation, for RT calculation as well: Rachel Cooper, accessed November 17th 2015, see full citation above
     RT = secs - secs0;
     % Assign values into growing row vector
-    participant_row(4) = response;
+    trial_row(currentStimulus,3) = response;
     %count = count + 1;
-    participant_row(5) = RT;
+    trial_row(currentStimulus,4) = RT;
+  
     %count = count + 1; 
+    
 end
 
