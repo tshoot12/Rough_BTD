@@ -1,6 +1,6 @@
 % General stepping algorithm for psychometric functions
 % Create an array of zeroes to store user input
-trial_number = 50;
+trial_number = 50; % How many stimuli will be shown to participants and how many recordings will be done
 trial_row = zeros(trial_number,4);
 time_interval = 0.5;% Can be changed to suit specific experiment parameters
 
@@ -18,7 +18,6 @@ else
     error('Participant Number must be a number')
 end
 
-
 % Translate key numbers into allocated names
 KbName('UnifyKeyNames');
 leftKey = KbName('LeftArrow');
@@ -26,13 +25,9 @@ rightKey = KbName('RightArrow');
 quitKey = KbName('ESCAPE');
 enterKey = KbName('return');
 
-% create a new response variable to store one response per stimulus
-response = double(1);
-
+%Start up PTB
 Main_Screen = 0; % Citation: screen set up, text descriptions and flips found on exampleExperiment.m by Dr. David Hunter
 Screen('Preference', 'SkipSyncTests',1);
-
-% Restrict keypresses to only the numbers and the Esc key
 
 % Figures out screen resolution and calculates how to centre a shape
 [wPtr,rect] = Screen('OpenWindow',1);
@@ -41,60 +36,61 @@ screenHeight = rect(4);
 screenCenterX = screenWidth/2;
 screenCenterY = screenHeight/2;
 
+% Set height and width of shape
 myRectWidth = 100;
 myRectHeight = 100;
 
+% Center shape
 myRectLeft = screenCenterX - myRectWidth/2;
 myRectTop = screenCenterY - myRectHeight/2;
 myRectRight = myRectLeft + myRectWidth;
 myRectBottom = myRectTop + myRectHeight;
 myRect = [myRectLeft, myRectTop, myRectRight, myRectBottom];
 
+% create a new response variable to store one response per stimulus
+response = double(1);
 
-
-
-for currentStimulus = 1:trial_number; % Can change amount of stimuli here
-    default = randperm(2,1);
-    %trial_row(currentStimulus,:); 
+for currentStimulus = 1:trial_number;
+    % Store the trial number into growing matrix
     trial_row(currentStimulus,1)= currentStimulus;
-    %count = count + 1;
-    % Turns screen black, sets location of the image
-    %Screen('FillRect',wPtr, [ 0 0 0 0]);
-    %rect= [ 0 0 width height];
     
-    % default first stimulus, randomly chooses number from 1 to 2, if 1
-    % then goes to the right, if 2 then goes to the left
+    % Set the default to randomly choose 1 or 2
+    default = randperm(2,1); 
+    
+    % default first stimulus, if 1 then goes to the left, if 2 then goes to
+    % the right
     if default < 2
         myRect = [myRectLeft - 100, myRectTop, myRectRight - 100, myRectBottom];
     else
         myRect = [myRectLeft + 100, myRectTop, myRectRight + 100, myRectBottom];
     end
-    secs0 = GetSecs; % Citation: calculating RT by Rachel Cooper under 'Creating experiments using Matlab and Psychtoolbox' accessed November 17th 2015, can be found on: https://www.academia.edu/2614964/Creating_experiments_using_Matlab_and_Psychtoolbox
-    % Wait for keypress and release, only accurate to the nearest 5ms,
-    % record time until keypress and which key was pressed
-    Screen('FillRect',wPtr,[0 0 255],myRect)
-    Screen('FillOval',wPtr,[255 0 0 ],myRect)
-    Screen('Flip',wPtr);
-    RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
-    WaitSecs(time_interval);
-    KbWait;
+    
+    % Record whether 1 or 2 was chosen into growing matrix
     trial_row(currentStimulus,2) = default;
-    % Get time of stimulus onset
     
-    % Make screen visible to participant, wait specified amount of seconds
-    % on each face
+    % Draw circle to screen
+    Screen('FillRect',wPtr,[0 0 255],myRect)
+    Screen('FillOval',wPtr,[255 0 0 ],myRect)% Why is the colour weird?
+    Screen('Flip',wPtr);
     
+    % Only look for key presses for the relevant keys
+    RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
     
-    %Screen('Flip', window);
+    % Wait some time so KbWait does not advance too quickly
+    WaitSecs(time_interval);
     
-    %KbWait;
+    % Time zero for reaction time 
+    secs0 = GetSecs; % Citation: calculating RT by Rachel Cooper under 'Creating experiments using Matlab and Psychtoolbox' accessed November 17th 2015, can be found on: https://www.academia.edu/2614964/Creating_experiments_using_Matlab_and_Psychtoolbox
+    
+    % Wait for keypress and release, only accurate to the nearest 5ms
+    KbWait;
+   
+    % Check what key was pressed
     [keyIsDown, secs, keyCode] = KbCheck;% Citation: Rachel Cooper, accessed November 17th 2015, see full citation above. Modified, deleted deltasecs
     
-    
-    % If Esc pressed, data for that trial will not be saved, will quit
-    % back to Matlab and indicate that the quit key was pressed
+    % Stores the user response associated with direction of stimulus, 7 =
+    % left, 8 = right, otherwise quit is pressed and error comes up
     if keyCode(leftKey)
-        % stores the user response associated with direction of stimulus, 7 = left, 8 = right.
         response = 7;
     elseif keyCode(rightKey)
         response = 8;
@@ -103,19 +99,18 @@ for currentStimulus = 1:trial_number; % Can change amount of stimuli here
         error('User hit the quit key');
     end
     
-    %Citation, for RT calculation as well: Rachel Cooper, accessed November 17th 2015, see full citation above
-    RT = secs - secs0;
-    % Assign values into growing row vector
-    trial_row(currentStimulus,3) = response;
-    %count = count + 1;
-    trial_row(currentStimulus,4) = RT;
+    % Calculate reaction time
+    RT = secs - secs0; %Citation, for RT calculation as well: Rachel Cooper, accessed November 17th 2015, see full citation above
     
-  
-    %count = count + 1; 
-    %KbReleaseWait;
+    % Assign responses (left or right keypress) into growing matrix
+    trial_row(currentStimulus,3) = response;
+    
+    % Record reaction time in matrix
+    trial_row(currentStimulus,4) = RT;
 end
+
 % Debrief message after experiment is complete
-debrief = 'The experiment is now over press enter to quit back to Matlab.';
+debrief = 'The experiment is now over, press enter to quit back to Matlab.';
 
 % White screen with specified text values
 Screen('FillRect',wPtr,[ 255 255 255 255]); % Citation, text, restricting keys and screen: exampleExperiment.m by Dr. David Hunter
@@ -129,8 +124,9 @@ Screen('Flip', wPtr);
 
 % Restrict keypresses to the enter/return key, wait for keypress
 RestrictKeysForKbCheck(enterKey);
-
 KbWait
+
+
 % Close Psychtoolbox
 Screen('CloseAll')
 
