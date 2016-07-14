@@ -1,8 +1,8 @@
 % General stepping algorithm for psychometric functions
 % Create an array of zeroes to store user input
-trial_number = 50; % How many stimuli will be shown to participants and how many recordings will be done
+trial_number = 10; % How many stimuli will be shown to participants and how many recordings will be done
 trial_row = zeros(trial_number,4);
-time_interval = 0.5;% Can be changed to suit specific experiment parameters
+time_interval = 5/1000;% Can be changed to suit specific experiment parameters
 
 % Create dialog box to enter participant number in
 prompt = {'Enter Participant Number:'}; % Citation: dialog box code found on: http://www.mathworks.com/help/matlab/ref/inputdlg.html?refresh=true, last access was November 26th 2015
@@ -55,7 +55,7 @@ for currentStimulus = 1:trial_number;
     trial_row(currentStimulus,1)= currentStimulus;
     
     % Set the default to randomly choose 1 or 2
-    default = randperm(2,1); 
+    default = randperm(2,1);
     
     % default first stimulus, if 1 then goes to the left, if 2 then goes to
     % the right
@@ -67,6 +67,8 @@ for currentStimulus = 1:trial_number;
     
     % Record whether 1 or 2 was chosen into growing matrix
     trial_row(currentStimulus,2) = default;
+    % Wait some time so KbWait does not advance too quickly
+    WaitSecs(time_interval);
     
     % Draw circle to screen
     Screen('FillRect',wPtr,[0 0 255],myRect)
@@ -76,17 +78,22 @@ for currentStimulus = 1:trial_number;
     % Only look for key presses for the relevant keys
     RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
     
-    % Wait some time so KbWait does not advance too quickly
-    WaitSecs(time_interval);
     
-    % Time zero for reaction time 
+    
+    % Time zero for reaction time
     secs0 = GetSecs; % Citation: calculating RT by Rachel Cooper under 'Creating experiments using Matlab and Psychtoolbox' accessed November 17th 2015, can be found on: https://www.academia.edu/2614964/Creating_experiments_using_Matlab_and_Psychtoolbox
     
     % Wait for keypress and release, only accurate to the nearest 5ms
+    
+    
     KbWait;
-   
+    
+    
+    
+    
     % Check what key was pressed
     [keyIsDown, secs, keyCode] = KbCheck;% Citation: Rachel Cooper, accessed November 17th 2015, see full citation above. Modified, deleted deltasecs
+    KbReleaseWait;
     
     % Stores the user response associated with direction of stimulus, 7 =
     % left, 8 = right, otherwise quit is pressed and error comes up
@@ -107,6 +114,9 @@ for currentStimulus = 1:trial_number;
     
     % Record reaction time in matrix
     trial_row(currentStimulus,4) = RT;
+    
+    
+   
 end
 
 % Debrief message after experiment is complete
@@ -130,3 +140,7 @@ KbWait
 % Close Psychtoolbox
 Screen('CloseAll')
 
+
+
+
+dlmwrite('BTD_Results.csv',trial_row,'delimiter', ',','-append');
