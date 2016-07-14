@@ -1,10 +1,9 @@
 % General stepping algorithm for psychometric functions
 % Create an array of zeroes to store user input
-trial_number = 20;
+trial_number = 50;
 trial_row = zeros(trial_number,4);
+time_interval = 0.5;% Can be changed to suit specific experiment parameters
 
-% Use count to advance position in row vector to avoid rewriting data
-%count = 1;
 % Create dialog box to enter participant number in
 prompt = {'Enter Participant Number:'}; % Citation: dialog box code found on: http://www.mathworks.com/help/matlab/ref/inputdlg.html?refresh=true, last access was November 26th 2015
 dlg_title = 'Participant Number';
@@ -18,34 +17,25 @@ if isfinite(participant_number)
 else
     error('Participant Number must be a number')
 end
-time_interval = 30;% Can be changed to suit specific experiment parameters
 
-% Possible have a separate script that emalgamates each participant
-% together
+
+% Translate key numbers into allocated names
 KbName('UnifyKeyNames');
 leftKey = KbName('LeftArrow');
 rightKey = KbName('RightArrow');
 quitKey = KbName('ESCAPE');
 enterKey = KbName('return');
 
-%% create a new response variable ( a vector of length noImages to store
-% one responce per image
+% create a new response variable to store one response per stimulus
 response = double(1);
-%whichScreen = 0;
-% Get screen numbers
-screens = Screen('Screens');
-% Which screen to draw to
-screenNumber = max(screens);
-% Define black and white
-white = WhiteIndex(screenNumber);
-black = BlackIndex(screenNumber);
+
 Main_Screen = 0; % Citation: screen set up, text descriptions and flips found on exampleExperiment.m by Dr. David Hunter
 Screen('Preference', 'SkipSyncTests',1);
 
 % Restrict keypresses to only the numbers and the Esc key
-RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
+
 % Figures out screen resolution and calculates how to centre a shape
-[wPtr,rect] = Screen('OpenWindow',0);
+[wPtr,rect] = Screen('OpenWindow',1);
 screenWidth = rect(3);
 screenHeight = rect(4);
 screenCenterX = screenWidth/2;
@@ -71,6 +61,7 @@ for currentStimulus = 1:trial_number; % Can change amount of stimuli here
     % Turns screen black, sets location of the image
     %Screen('FillRect',wPtr, [ 0 0 0 0]);
     %rect= [ 0 0 width height];
+    
     % default first stimulus, randomly chooses number from 1 to 2, if 1
     % then goes to the right, if 2 then goes to the left
     if default < 2
@@ -84,6 +75,8 @@ for currentStimulus = 1:trial_number; % Can change amount of stimuli here
     Screen('FillRect',wPtr,[0 0 255],myRect)
     Screen('FillOval',wPtr,[255 0 0 ],myRect)
     Screen('Flip',wPtr);
+    RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
+    WaitSecs(time_interval);
     KbWait;
     trial_row(currentStimulus,2) = default;
     % Get time of stimulus onset
@@ -93,7 +86,7 @@ for currentStimulus = 1:trial_number; % Can change amount of stimuli here
     
     
     %Screen('Flip', window);
-    %WaitSecs(time_interval);
+    
     %KbWait;
     [keyIsDown, secs, keyCode] = KbCheck;% Citation: Rachel Cooper, accessed November 17th 2015, see full citation above. Modified, deleted deltasecs
     
@@ -109,15 +102,17 @@ for currentStimulus = 1:trial_number; % Can change amount of stimuli here
         Screen('CloseAll');
         error('User hit the quit key');
     end
+    
     %Citation, for RT calculation as well: Rachel Cooper, accessed November 17th 2015, see full citation above
     RT = secs - secs0;
     % Assign values into growing row vector
     trial_row(currentStimulus,3) = response;
     %count = count + 1;
     trial_row(currentStimulus,4) = RT;
+    
   
     %count = count + 1; 
-    
+    %KbReleaseWait;
 end
 % Debrief message after experiment is complete
 debrief = 'The experiment is now over press enter to quit back to Matlab.';
@@ -134,6 +129,7 @@ Screen('Flip', wPtr);
 
 % Restrict keypresses to the enter/return key, wait for keypress
 RestrictKeysForKbCheck(enterKey);
+
 KbWait
 % Close Psychtoolbox
 Screen('CloseAll')
