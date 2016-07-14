@@ -37,8 +37,19 @@ screenCenterX = screenWidth/2;
 screenCenterY = screenHeight/2;
 
 % Set height and width of shape
-myRectWidth = 100;
-myRectHeight = 100;
+myOvalWidth = 100;
+myOvalHeight = 100;
+
+% Center shape
+myOvalLeft = screenCenterX - myOvalWidth/2;
+myOvalTop = screenCenterY - myOvalHeight/2;
+myOvalRight = myOvalLeft + myOvalWidth;
+myOvalBottom = myOvalTop + myOvalHeight;
+myOval = [myOvalLeft, myOvalTop, myOvalRight, myOvalBottom];
+
+% Set height and width of shape
+myRectWidth = 50;
+myRectHeight = 50;
 
 % Center shape
 myRectLeft = screenCenterX - myRectWidth/2;
@@ -60,9 +71,9 @@ for currentStimulus = 1:trial_number;
     % default first stimulus, if 1 then goes to the left, if 2 then goes to
     % the right
     if default < 2
-        myRect = [myRectLeft - 100, myRectTop, myRectRight - 100, myRectBottom];
+        myOval = [myOvalLeft - 300, myOvalTop, myOvalRight - 300, myOvalBottom]; % translates circle 300 pixels
     else
-        myRect = [myRectLeft + 100, myRectTop, myRectRight + 100, myRectBottom];
+        myOval = [myOvalLeft + 300, myOvalTop, myOvalRight + 300, myOvalBottom];
     end
     
     % Record whether 1 or 2 was chosen into growing matrix
@@ -71,8 +82,8 @@ for currentStimulus = 1:trial_number;
     WaitSecs(time_interval);
     
     % Draw circle to screen
-    Screen('FillRect',wPtr,[0 0 255],myRect)
-    Screen('FillOval',wPtr,[255 0 0 ],myRect)% Why is the colour weird?
+    Screen('FillRect', wPtr, 0, myRect);
+    Screen('FillOval',wPtr,[255 0 0 ],myOval)
     Screen('Flip',wPtr);
     
     % Only look for key presses for the relevant keys
@@ -88,12 +99,11 @@ for currentStimulus = 1:trial_number;
     
     KbWait;
     
-    
-    
-    
     % Check what key was pressed
     [keyIsDown, secs, keyCode] = KbCheck;% Citation: Rachel Cooper, accessed November 17th 2015, see full citation above. Modified, deleted deltasecs
+    
     KbReleaseWait;
+    
     
     % Stores the user response associated with direction of stimulus, 7 =
     % left, 8 = right, otherwise quit is pressed and error comes up
