@@ -27,7 +27,7 @@ enterKey = KbName('return');
 
 %Start up PTB
 Main_Screen = 0; % Citation: screen set up, text descriptions and flips found on exampleExperiment.m by Dr. David Hunter
-Screen('Preference', 'SkipSyncTests',1);
+Screen('Preference', 'SkipSyncTests',0);
 
 % Figures out screen resolution and calculates how to centre a shape
 [wPtr,rect] = Screen('OpenWindow',1);
@@ -89,21 +89,17 @@ for currentStimulus = 1:trial_number;
     % Only look for key presses for the relevant keys
     RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
     
-    
-    
     % Time zero for reaction time
     secs0 = GetSecs; % Citation: calculating RT by Rachel Cooper under 'Creating experiments using Matlab and Psychtoolbox' accessed November 17th 2015, can be found on: https://www.academia.edu/2614964/Creating_experiments_using_Matlab_and_Psychtoolbox
     
     % Wait for keypress and release, only accurate to the nearest 5ms
-    
-    
     KbWait;
     
     % Check what key was pressed
     [keyIsDown, secs, keyCode] = KbCheck;% Citation: Rachel Cooper, accessed November 17th 2015, see full citation above. Modified, deleted deltasecs
     
+    % Wait for key to be released, extremely important
     KbReleaseWait;
-    
     
     % Stores the user response associated with direction of stimulus, 7 =
     % left, 8 = right, otherwise quit is pressed and error comes up
@@ -124,8 +120,6 @@ for currentStimulus = 1:trial_number;
     
     % Record reaction time in matrix
     trial_row(currentStimulus,4) = RT;
-    
-    
    
 end
 
@@ -146,11 +140,7 @@ Screen('Flip', wPtr);
 RestrictKeysForKbCheck(enterKey);
 KbWait
 
-
 % Close Psychtoolbox
 Screen('CloseAll')
-
-
-
 
 dlmwrite('BTD_Results.csv',trial_row,'delimiter', ',','-append');
