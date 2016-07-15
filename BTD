@@ -1,7 +1,7 @@
 % General stepping algorithm for psychometric functions
 % Create an array of zeroes to store user input
 trial_number = 10; % How many stimuli will be shown to participants and how many recordings will be done
-trial_row = zeros(trial_number,4);
+trial_row = zeros(trial_number,5);
 time_interval = 5/1000;% Can be changed to suit specific experiment parameters
 
 % Create dialog box to enter participant number in
@@ -30,7 +30,7 @@ Main_Screen = 0; % Citation: screen set up, text descriptions and flips found on
 Screen('Preference', 'SkipSyncTests',0);
 
 % Figures out screen resolution and calculates how to centre a shape
-[wPtr,rect] = Screen('OpenWindow',1);
+[wPtr,rect] = Screen('OpenWindow',0);
 screenWidth = rect(3);
 screenHeight = rect(4);
 screenCenterX = screenWidth/2;
@@ -63,8 +63,8 @@ response = double(1);
 
 for currentStimulus = 1:trial_number;
     % Store the trial number into growing matrix
-    trial_row(currentStimulus,1)= currentStimulus;
-    
+    trial_row(currentStimulus,1)= participant_row;
+    trial_row(currentStimulus,2)= currentStimulus;
     % Set the default to randomly choose 1 or 2
     default = randperm(2,1);
     
@@ -77,7 +77,7 @@ for currentStimulus = 1:trial_number;
     end
     
     % Record whether 1 or 2 was chosen into growing matrix
-    trial_row(currentStimulus,2) = default;
+    trial_row(currentStimulus,3) = default;
     % Wait some time so KbWait does not advance too quickly
     WaitSecs(time_interval);
     
@@ -116,10 +116,10 @@ for currentStimulus = 1:trial_number;
     RT = secs - secs0; %Citation, for RT calculation as well: Rachel Cooper, accessed November 17th 2015, see full citation above
     
     % Assign responses (left or right keypress) into growing matrix
-    trial_row(currentStimulus,3) = response;
+    trial_row(currentStimulus,4) = response;
     
     % Record reaction time in matrix
-    trial_row(currentStimulus,4) = RT;
+    trial_row(currentStimulus,5) = RT;
    
 end
 
