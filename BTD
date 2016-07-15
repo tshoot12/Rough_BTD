@@ -61,10 +61,15 @@ myRect = [myRectLeft, myRectTop, myRectRight, myRectBottom];
 % create a new response variable to store one response per stimulus
 response = double(1);
 
+% Set up Quest
+%q = QuestCreate(tGuess, tGuessSd, pThreshold, beta, delta, gamma);
+%q.normalizePdf = 1;
+
 for currentStimulus = 1:trial_number;
-    % Store the trial number into growing matrix
+    % Store the trial and participant number into growing matrix
     trial_row(currentStimulus,1)= participant_row;
     trial_row(currentStimulus,2)= currentStimulus;
+    
     % Set the default to randomly choose 1 or 2
     default = randperm(2,1);
     
@@ -72,8 +77,10 @@ for currentStimulus = 1:trial_number;
     % the right
     if default < 2
         myOval = [myOvalLeft - 300, myOvalTop, myOvalRight - 300, myOvalBottom]; % translates circle 300 pixels
+        myOval2 = [myOvalLeft + 500, myOvalTop, myOvalRight + 500, myOvalBottom]; % translates circle 300 pixels
     else
         myOval = [myOvalLeft + 300, myOvalTop, myOvalRight + 300, myOvalBottom];
+        myOval2 = [myOvalLeft - 500, myOvalTop, myOvalRight - 500, myOvalBottom];
     end
     
     % Record whether 1 or 2 was chosen into growing matrix
@@ -85,6 +92,8 @@ for currentStimulus = 1:trial_number;
     Screen('FillRect', wPtr, 0, myRect);
     Screen('FillOval',wPtr,[255 0 0 ],myOval)
     Screen('Flip',wPtr);
+    
+    
     
     % Only look for key presses for the relevant keys
     RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
@@ -100,6 +109,15 @@ for currentStimulus = 1:trial_number;
     
     % Wait for key to be released, extremely important
     KbReleaseWait;
+   
+    
+    
+    
+    % Draw circle to screen
+    Screen('FillRect', wPtr, 0, myRect);
+    Screen('FillOval',wPtr,[0 0 255 ],myOval2)
+    Screen('Flip',wPtr);
+    WaitSecs(1)
     
     % Stores the user response associated with direction of stimulus, 7 =
     % left, 8 = right, otherwise quit is pressed and error comes up
@@ -120,8 +138,9 @@ for currentStimulus = 1:trial_number;
     
     % Record reaction time in matrix
     trial_row(currentStimulus,5) = RT;
-   
+    
 end
+
 
 % Debrief message after experiment is complete
 debrief = 'The experiment is now over, press enter to quit back to Matlab.';
