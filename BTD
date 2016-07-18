@@ -1,3 +1,4 @@
+
 % General stepping algorithm for psychometric functions
 % Create an array of zeroes to store user input
 trial_number = 10; % How many stimuli will be shown to participants and how many recordings will be done
@@ -61,11 +62,20 @@ myRect = [myRectLeft, myRectTop, myRectRight, myRectBottom];
 % create a new response variable to store one response per stimulus
 response = double(1);
 
+% Quest priors
+tGuess = -1; % Threshold estimate
+tGuessSd = 2; 
+pThreshold = 0.5; % Percentage correct 
+beta = 3.5; % Slope of function, 3.5 is good for a two-alternative forced-choice paradigm 
+delta = 0.01; % estimated probability of a failure well above threshold
+gamma = 0.5;% The probability of success at zero intensity, for two-alternative forced choice 
+
 % Set up Quest
-%q = QuestCreate(tGuess, tGuessSd, pThreshold, beta, delta, gamma);
-%q.normalizePdf = 1;
+q = QuestCreate(tGuess, tGuessSd, pThreshold, beta, delta, gamma);
+q.normalizePdf = 1;
 
 for currentStimulus = 1:trial_number;
+    SOA = 10; % asynchrony between the two stimuli, change this?
     % Store the trial and participant number into growing matrix
     trial_row(currentStimulus,1)= participant_row;
     trial_row(currentStimulus,2)= currentStimulus;
@@ -77,10 +87,10 @@ for currentStimulus = 1:trial_number;
     % the right
     if default < 2
         myOval = [myOvalLeft - 300, myOvalTop, myOvalRight - 300, myOvalBottom]; % translates circle 300 pixels
-        myOval2 = [myOvalLeft + 500, myOvalTop, myOvalRight + 500, myOvalBottom]; % translates circle 300 pixels
+        myOval2 = [myOvalLeft + 300, myOvalTop, myOvalRight + 300, myOvalBottom]; % translates circle 300 pixels
     else
         myOval = [myOvalLeft + 300, myOvalTop, myOvalRight + 300, myOvalBottom];
-        myOval2 = [myOvalLeft - 500, myOvalTop, myOvalRight - 500, myOvalBottom];
+        myOval2 = [myOvalLeft - 300, myOvalTop, myOvalRight - 300, myOvalBottom];
     end
     
     % Record whether 1 or 2 was chosen into growing matrix
@@ -93,7 +103,14 @@ for currentStimulus = 1:trial_number;
     Screen('FillOval',wPtr,[255 0 0 ],myOval)
     Screen('Flip',wPtr);
     
+    WaitSecs(SOA);
     
+    % Draw circle to screen
+    Screen('FillRect', wPtr, 0, myRect);
+    Screen('FillOval',wPtr,[0 0 255 ],myOval2)
+    Screen('Flip',wPtr);
+    
+    WaitSecs(time_interval);
     
     % Only look for key presses for the relevant keys
     RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
@@ -109,15 +126,6 @@ for currentStimulus = 1:trial_number;
     
     % Wait for key to be released, extremely important
     KbReleaseWait;
-   
-    
-    
-    
-    % Draw circle to screen
-    Screen('FillRect', wPtr, 0, myRect);
-    Screen('FillOval',wPtr,[0 0 255 ],myOval2)
-    Screen('Flip',wPtr);
-    WaitSecs(1)
     
     % Stores the user response associated with direction of stimulus, 7 =
     % left, 8 = right, otherwise quit is pressed and error comes up
@@ -138,6 +146,7 @@ for currentStimulus = 1:trial_number;
     
     % Record reaction time in matrix
     trial_row(currentStimulus,5) = RT;
+    q = QuestUpdate(q, SOA, response); % updates quest? Test 
     
 end
 
