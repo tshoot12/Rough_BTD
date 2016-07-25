@@ -4,24 +4,26 @@
 trial_number = 50; % How many stimuli will be shown to participants and how many recordings will be done
 base_trials = 5; % Estimates beta and alpha
 SOA = 0.005:0.001:0.15; % amount of ms range to sample from
-trial_row = zeros(trial_number,5);
+trial_row = zeros(trial_number,6);
 time_interval = 0.005;% Can be changed to suit specific experiment parameters
-
-real_alpha = 0; % estimated SOA of threshold
-real_beta = 3.5; % estimated threshold value
-data = nan(length(trial_number),4);
+SOA_L = zeros(trial_number,1);
+SOA_R = zeros(trial_number,1);
+RT_L = zeros(trial_number,1);
+RT_R= zeros(trial_number,1);
+%real_alpha = 0; % estimated SOA of threshold
+%real_beta = 3.5; % estimated threshold value
+%data = nan(length(trial_number),4);
 for w = 1:length(x)
     real_p(w) = (1/(1+exp(-1*real_beta*(x(w)-real_alpha))));
 end
 % Estimate the psychometric function
-r_alpha = -150:1:150; % Go from -500ms (left) to 500ms (right) sampling at 1ms
-r_beta = 0:0.05:5; % Go from 0 slope to 5 slope every 0.05
+%r_alpha = -150:1:150; % Go from -500ms (left) to 500ms (right) sampling at 1ms
+%r_beta = 0:0.05:5; % Go from 0 slope to 5 slope every 0.05
 
-x_index = []; % index of x and trial bias whatever that means?
-response_1 = []; % response either left or right (7 or 8)
-alpha = 0;
-beta = 0;
-
+%x_index = []; % index of x and trial bias whatever that means?
+%response_1 = []; % response either left or right (7 or 8)
+%alpha = 0;
+%beta = 0;
 
 % Create dialog box to enter participant number in
 prompt = {'Enter Participant Number:'}; % Citation: dialog box code found on: http://www.mathworks.com/help/matlab/ref/inputdlg.html?refresh=true, last access was November 26th 2015
@@ -82,8 +84,8 @@ response = double(1);
 
 for currentStimulus = 1:trial_number;
     Randomizer = randperm(length(SOA));
-    SOA = SOA(Randomizer);% asynchrony between the two stimuli, change this?
-    SOA_trial = SOA(1,1);
+    SOA = SOA(Randomizer);% Randomize between two different ms time intervals
+    SOA_trial = SOA(1,1); % choose first cell of vector as value
     % Store the trial and participant number into growing matrix
     trial_row(currentStimulus,1)= participant_row;
     trial_row(currentStimulus,2)= currentStimulus;
@@ -94,8 +96,8 @@ for currentStimulus = 1:trial_number;
     % default first stimulus, if 1 then goes to the left, if 2 then goes to
     % the right
     if default < 2
-        myOval = [myOvalLeft - 300, myOvalTop, myOvalRight - 300, myOvalBottom]; % translates circle 300 pixels
-        myOval2 = [myOvalLeft + 300, myOvalTop, myOvalRight + 300, myOvalBottom]; % translates circle 300 pixels
+        myOval = [myOvalLeft - 300, myOvalTop, myOvalRight - 300, myOvalBottom]; % translates circle 300 pixels, first stimulus
+        myOval2 = [myOvalLeft + 300, myOvalTop, myOvalRight + 300, myOvalBottom]; % translates circle 300 pixels, second stimulus
     else
         myOval = [myOvalLeft + 300, myOvalTop, myOvalRight + 300, myOvalBottom];
         myOval2 = [myOvalLeft - 300, myOvalTop, myOvalRight - 300, myOvalBottom];
@@ -103,15 +105,18 @@ for currentStimulus = 1:trial_number;
     
     % Record whether 1 or 2 was chosen into growing matrix
     trial_row(currentStimulus,3) = default;
+    % Record what the stimulus onset asynchrony was chosen to be for the
+    % trial
+    trial_row(currentStimulus,4) = SOA_trial;
     % Wait some time so KbWait does not advance too quickly
     WaitSecs(time_interval);
     
-    % Draw circle to screen
+    % Draw circle to screen and fixation square
     Screen('FillRect', wPtr, 0, myRect);
     Screen('FillOval',wPtr,[255 0 0 ],myOval)
     Screen('Flip',wPtr);
     
-    WaitSecs(SOA_trial);
+    WaitSecs(SOA_trial); % Wait designated SOA
     
     
     % Draw circle to screen
@@ -119,14 +124,15 @@ for currentStimulus = 1:trial_number;
     Screen('FillOval',wPtr,[0 0 255 ],myOval2)
     Screen('Flip',wPtr);
     
-    WaitSecs(time_interval);
-   
+    WaitSecs(time_interval); % Should I have this here?
+    
+    
     % Time zero for reaction time
     secs0 = GetSecs; % Citation: calculating RT by Rachel Cooper under 'Creating experiments using Matlab and Psychtoolbox' accessed November 17th 2015, can be found on: https://www.academia.edu/2614964/Creating_experiments_using_Matlab_and_Psychtoolbox
     
     Screen(wPtr,'FillRect',[ 255 255 255 255]);
     Screen('Flip', wPtr);
-   
+    
     % Only look for key presses for the relevant keys
     RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
     
@@ -155,13 +161,19 @@ for currentStimulus = 1:trial_number;
     RT = secs - secs0; %Citation, for RT calculation as well: Rachel Cooper, accessed November 17th 2015, see full citation above
     
     % Assign responses (left or right keypress) into growing matrix
-    trial_row(currentStimulus,4) = response;
+    trial_row(currentStimulus,5) = response;
     
     % Record reaction time in matrix
-    trial_row(currentStimulus,5) = RT;
+    trial_row(currentStimulus,6) = RT;
+    if trial_row(currentStimulus,3) == 1 && trial_row(currentStimulus,5) == 7;
+        SOA_L = trial_row(currentStimulus,4);
+        RT_L = trial_row(currentStimulus,6);
+    elseif trial_row(currentStimulus,3) == 2 && trial_row(currentStimulus,5) == 8;
+        SOA_R = trial_row(currentStimulus,4);
+        RT_R = trial_row(currentStimulus,6);
+    end
     
 end
-
 
 % Debrief message after experiment is complete
 debrief = 'The experiment is now over, press enter to quit back to Matlab.';
