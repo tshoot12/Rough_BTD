@@ -1,8 +1,27 @@
+
 % General stepping algorithm for psychometric functions
 % Create an array of zeroes to store user input
-trial_number = 10; % How many stimuli will be shown to participants and how many recordings will be done
+trial_number = 50; % How many stimuli will be shown to participants and how many recordings will be done
+base_trials = 5; % Estimates beta and alpha
+SOA = 0.005:0.001:0.15; % amount of ms range to sample from
 trial_row = zeros(trial_number,5);
-time_interval = 5/1000;% Can be changed to suit specific experiment parameters
+time_interval = 0.005;% Can be changed to suit specific experiment parameters
+
+real_alpha = 0; % estimated SOA of threshold
+real_beta = 3.5; % estimated threshold value
+data = nan(length(trial_number),4);
+for w = 1:length(x)
+    real_p(w) = (1/(1+exp(-1*real_beta*(x(w)-real_alpha))));
+end
+% Estimate the psychometric function
+r_alpha = -150:1:150; % Go from -500ms (left) to 500ms (right) sampling at 1ms
+r_beta = 0:0.05:5; % Go from 0 slope to 5 slope every 0.05
+
+x_index = []; % index of x and trial bias whatever that means?
+response_1 = []; % response either left or right (7 or 8)
+alpha = 0;
+beta = 0;
+
 
 % Create dialog box to enter participant number in
 prompt = {'Enter Participant Number:'}; % Citation: dialog box code found on: http://www.mathworks.com/help/matlab/ref/inputdlg.html?refresh=true, last access was November 26th 2015
@@ -27,10 +46,10 @@ enterKey = KbName('return');
 
 %Start up PTB
 Main_Screen = 0; % Citation: screen set up, text descriptions and flips found on exampleExperiment.m by Dr. David Hunter
-Screen('Preference', 'SkipSyncTests',0);
+Screen('Preference', 'SkipSyncTests',1); % So if you are using more than one monitor put to 1 to skip VBL check, if not go to zero
 
 % Figures out screen resolution and calculates how to centre a shape
-[wPtr,rect] = Screen('OpenWindow',0);
+[wPtr,rect] = Screen('OpenWindow',1); % if two monitors, set to one to go on primary
 screenWidth = rect(3);
 screenHeight = rect(4);
 screenCenterX = screenWidth/2;
@@ -61,11 +80,10 @@ myRect = [myRectLeft, myRectTop, myRectRight, myRectBottom];
 % create a new response variable to store one response per stimulus
 response = double(1);
 
-% Set up Quest
-%q = QuestCreate(tGuess, tGuessSd, pThreshold, beta, delta, gamma);
-%q.normalizePdf = 1;
-
 for currentStimulus = 1:trial_number;
+    Randomizer = randperm(length(SOA));
+    SOA = SOA(Randomizer);% asynchrony between the two stimuli, change this?
+    SOA_trial = SOA(1,1);
     % Store the trial and participant number into growing matrix
     trial_row(currentStimulus,1)= participant_row;
     trial_row(currentStimulus,2)= currentStimulus;
@@ -77,10 +95,10 @@ for currentStimulus = 1:trial_number;
     % the right
     if default < 2
         myOval = [myOvalLeft - 300, myOvalTop, myOvalRight - 300, myOvalBottom]; % translates circle 300 pixels
-        myOval2 = [myOvalLeft + 500, myOvalTop, myOvalRight + 500, myOvalBottom]; % translates circle 300 pixels
+        myOval2 = [myOvalLeft + 300, myOvalTop, myOvalRight + 300, myOvalBottom]; % translates circle 300 pixels
     else
         myOval = [myOvalLeft + 300, myOvalTop, myOvalRight + 300, myOvalBottom];
-        myOval2 = [myOvalLeft - 500, myOvalTop, myOvalRight - 500, myOvalBottom];
+        myOval2 = [myOvalLeft - 300, myOvalTop, myOvalRight - 300, myOvalBottom];
     end
     
     % Record whether 1 or 2 was chosen into growing matrix
@@ -93,13 +111,24 @@ for currentStimulus = 1:trial_number;
     Screen('FillOval',wPtr,[255 0 0 ],myOval)
     Screen('Flip',wPtr);
     
+    WaitSecs(SOA_trial);
     
     
-    % Only look for key presses for the relevant keys
-    RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
+    % Draw circle to screen
+    Screen('FillRect', wPtr, 0, myRect);
+    Screen('FillOval',wPtr,[0 0 255 ],myOval2)
+    Screen('Flip',wPtr);
     
+    WaitSecs(time_interval);
+   
     % Time zero for reaction time
     secs0 = GetSecs; % Citation: calculating RT by Rachel Cooper under 'Creating experiments using Matlab and Psychtoolbox' accessed November 17th 2015, can be found on: https://www.academia.edu/2614964/Creating_experiments_using_Matlab_and_Psychtoolbox
+    
+    Screen(wPtr,'FillRect',[ 255 255 255 255]);
+    Screen('Flip', wPtr);
+   
+    % Only look for key presses for the relevant keys
+    RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
     
     % Wait for keypress and release, only accurate to the nearest 5ms
     KbWait;
@@ -109,15 +138,6 @@ for currentStimulus = 1:trial_number;
     
     % Wait for key to be released, extremely important
     KbReleaseWait;
-   
-    
-    
-    
-    % Draw circle to screen
-    Screen('FillRect', wPtr, 0, myRect);
-    Screen('FillOval',wPtr,[0 0 255 ],myOval2)
-    Screen('Flip',wPtr);
-    WaitSecs(1)
     
     % Stores the user response associated with direction of stimulus, 7 =
     % left, 8 = right, otherwise quit is pressed and error comes up
@@ -126,6 +146,7 @@ for currentStimulus = 1:trial_number;
     elseif keyCode(rightKey)
         response = 8;
     elseif keyCode(quitKey)
+        
         Screen('CloseAll');
         error('User hit the quit key');
     end
