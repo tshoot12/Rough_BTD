@@ -2,20 +2,18 @@
 % General stepping algorithm for psychometric functions
 % Create an array of zeroes to store user input
 trial_number = 50; % How many stimuli will be shown to participants and how many recordings will be done
-base_trials = 5; % Estimates beta and alpha
+%base_trials = 5; % Estimates beta and alpha
 SOA = 0.005:0.001:0.15; % amount of ms range to sample from
 trial_row = zeros(trial_number,6);
 time_interval = 0.005;% Can be changed to suit specific experiment parameters
-SOA_L = zeros(trial_number,1);
-SOA_R = zeros(trial_number,1);
-RT_L = zeros(trial_number,1);
-RT_R= zeros(trial_number,1);
+
 %real_alpha = 0; % estimated SOA of threshold
 %real_beta = 3.5; % estimated threshold value
 %data = nan(length(trial_number),4);
-for w = 1:length(x)
-    real_p(w) = (1/(1+exp(-1*real_beta*(x(w)-real_alpha))));
-end
+%for w = 1:length(x)
+%   real_p(w) = (1/(1+exp(-1*real_beta*(x(w)-real_alpha))));
+%
+%end
 % Estimate the psychometric function
 %r_alpha = -150:1:150; % Go from -500ms (left) to 500ms (right) sampling at 1ms
 %r_beta = 0:0.05:5; % Go from 0 slope to 5 slope every 0.05
@@ -116,12 +114,13 @@ for currentStimulus = 1:trial_number;
     Screen('FillOval',wPtr,[255 0 0 ],myOval)
     Screen('Flip',wPtr);
     
+    
     WaitSecs(SOA_trial); % Wait designated SOA
     
     
     % Draw circle to screen
     Screen('FillRect', wPtr, 0, myRect);
-    Screen('FillOval',wPtr,[0 0 255 ],myOval2)
+    Screen('FillOval',wPtr,[255 0 0],myOval2)
     Screen('Flip',wPtr);
     
     WaitSecs(time_interval); % Should I have this here?
@@ -165,13 +164,7 @@ for currentStimulus = 1:trial_number;
     
     % Record reaction time in matrix
     trial_row(currentStimulus,6) = RT;
-    if trial_row(currentStimulus,3) == 1 && trial_row(currentStimulus,5) == 7;
-        SOA_L = trial_row(currentStimulus,4);
-        RT_L = trial_row(currentStimulus,6);
-    elseif trial_row(currentStimulus,3) == 2 && trial_row(currentStimulus,5) == 8;
-        SOA_R = trial_row(currentStimulus,4);
-        RT_R = trial_row(currentStimulus,6);
-    end
+    
     
 end
 
@@ -194,5 +187,38 @@ KbWait
 
 % Close Psychtoolbox
 Screen('CloseAll')
+SOA_L_correct = nan(trial_number,1);
+SOA_R_correct = nan(trial_number,1);
+RT_L_correct = nan(trial_number,1);
+RT_R_correct= nan(trial_number,1);
+SOA_L_incorrect = nan(trial_number,1);
+SOA_R_incorrect = nan(trial_number,1);
+RT_L_incorrect = nan(trial_number,1);
+RT_R_incorrect= nan(trial_number,1);
+for x = 1:trial_number
+    if trial_row(x,3) == 1 && trial_row(x,5) == 7;% correct trials to the left
+        SOA_L_correct(x,1) = trial_row(x,4);
+        RT_L_correct (x,1)= trial_row(x,6);
+    elseif trial_row(x,3) == 2 && trial_row(x,5) == 8; % correct trials to the right
+        SOA_R_correct (x,1)= trial_row(x,4);
+        RT_R_correct (x,1)= trial_row(x,6);
+    elseif trial_row(x,3) == 1 && trial_row(x,5) == 8; % incorrect trials to the left, hit right
+        SOA_L_incorrect (x,1)= trial_row(x,4);
+        RT_R_incorrect (x,1)= trial_row(x,6);
+     elseif trial_row(x,3) == 2 && trial_row(x,5) == 7; % incorrect trials to the right, hit left
+        SOA_R_incorrect (x,1)= trial_row(x,4);
+        RT_L_incorrect (x,1)= trial_row(x,6);
+    end
+    
+end
 
+figure
+%ax1 = subplot (2,2,[1 1]);
+scatter(SOA_L_correct,RT_L_correct)
+%ax2 = subplot(2,2,[2 1]);
+scatter(SOA_L_incorrect,RT_R_incorrect)
+%ax3= subplot(2,2,[1 2]);
+scatter(SOA_R_correct,RT_R_correct)
+%ax4 = subplot(2,2,[2 2]);
+scatter(SOA_R_incorrect,RT_L_incorrect)
 dlmwrite('BTD_Results.csv',trial_row,'delimiter', ',','-append');
