@@ -14,6 +14,7 @@ time_interval = 0.005;% Can be changed to suit specific experiment parameters
 %   real_p(w) = (1/(1+exp(-1*real_beta*(x(w)-real_alpha))));
 %
 %end
+
 % Estimate the psychometric function
 %r_alpha = -150:1:150; % Go from -500ms (left) to 500ms (right) sampling at 1ms
 %r_beta = 0:0.05:5; % Go from 0 slope to 5 slope every 0.05
@@ -215,10 +216,25 @@ end
 figure
 %ax1 = subplot (2,2,[1 1]);
 scatter(SOA_L_correct,RT_L_correct)
+xlabel('Time in ms for SOA to the left')
+ylabe('RT to the left')
 %ax2 = subplot(2,2,[2 1]);
+p = polyfit(SOA_L_correct,RT_L_correct,1);
+f = polyval(p,SOA_L_correct);
+hold on
+plot(SOA_L_correct, RT_L_correct, '--g')
+figure
 scatter(SOA_L_incorrect,RT_R_incorrect)
+xlabel('Time in ms for SOA to the left')
+ylabe('RT to the right')
 %ax3= subplot(2,2,[1 2]);
+figure
 scatter(SOA_R_correct,RT_R_correct)
+xlabel('Time in ms for SOA to the right')
+ylabe('RT to the right')
 %ax4 = subplot(2,2,[2 2]);
+figure
 scatter(SOA_R_incorrect,RT_L_incorrect)
+xlabel('Time in ms for SOA to the right')
+ylabe('RT to the left')
 dlmwrite('BTD_Results.csv',trial_row,'delimiter', ',','-append');
