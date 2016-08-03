@@ -3,6 +3,249 @@
 % Create an array of zeroes to store user input
 trial_number = 50; % How many stimuli will be shown to participants and how many recordings will be done
 %base_trials = 5; % Estimates beta and alpha
+
+% General stepping algorithm for psychometric functions
+% Create an array of zeroes to store user input
+trial_number = 10; % How many stimuli will be shown to participants and how many recordings will be done
+%base_trials = 5; % Estimates beta and alpha
+SOA = 0:0.025:0.1; % amount of ms range to sample from
+trial_row = zeros(trial_number,6);
+time_interval = 0.005;% Can be changed to suit specific experiment parameters
+
+%real_alpha = 0; % estimated SOA of threshold
+%real_beta = 3.5; % estimated threshold value
+%data = nan(length(trial_number),4);
+%for w = 1:length(x)
+%   real_p(w) = (1/(1+exp(-1*real_beta*(x(w)-real_alpha))));
+%
+%end
+
+% Estimate the psychometric function
+%r_alpha = -150:1:150; % Go from -500ms (left) to 500ms (right) sampling at 1ms
+%r_beta = 0:0.05:5; % Go from 0 slope to 5 slope every 0.05
+
+%x_index = []; % index of x and trial bias whatever that means?
+%response_1 = []; % response either left or right (7 or 8)
+%alpha = 0;
+%beta = 0;
+
+% Create dialog box to enter participant number in
+prompt = {'Enter Participant Number:'}; % Citation: dialog box code found on: http://www.mathworks.com/help/matlab/ref/inputdlg.html?refresh=true, last access was November 26th 2015
+dlg_title = 'Participant Number';
+num_lines = 1;
+answer = inputdlg(prompt,dlg_title,num_lines);
+% Convert participant number from a character into a number
+participant_number = str2double(answer{1});
+% Ensure that participant number is a number and not a NaN
+if isfinite(participant_number)
+    participant_row = participant_number;
+else
+    error('Participant Number must be a number')
+end
+
+% Translate key numbers into allocated names
+KbName('UnifyKeyNames');
+leftKey = KbName('LeftArrow');
+rightKey = KbName('RightArrow');
+quitKey = KbName('ESCAPE');
+enterKey = KbName('return');
+
+%Start up PTB
+Main_Screen = 0; % Citation: screen set up, text descriptions and flips found on exampleExperiment.m by Dr. David Hunter
+Screen('Preference', 'SkipSyncTests',1); % So if you are using more than one monitor put to 1 to skip VBL check, if not go to zero
+
+% Figures out screen resolution and calculates how to centre a shape
+[wPtr,rect] = Screen('OpenWindow',0); % if two monitors, set to one to go on primary
+screenWidth = rect(3);
+screenHeight = rect(4);
+screenCenterX = screenWidth/2;
+screenCenterY = screenHeight/2;
+
+% Set height and width of shape
+myOvalWidth = 100;
+myOvalHeight = 100;
+
+% Center shape
+myOvalLeft = screenCenterX - myOvalWidth/2;
+myOvalTop = screenCenterY - myOvalHeight/2;
+myOvalRight = myOvalLeft + myOvalWidth;
+myOvalBottom = myOvalTop + myOvalHeight;
+myOval = [myOvalLeft, myOvalTop, myOvalRight, myOvalBottom];
+
+% Set height and width of shape
+myRectWidth = 50;
+myRectHeight = 50;
+
+% Center shape
+myRectLeft = screenCenterX - myRectWidth/2;
+myRectTop = screenCenterY - myRectHeight/2;
+myRectRight = myRectLeft + myRectWidth;
+myRectBottom = myRectTop + myRectHeight;
+myRect = [myRectLeft, myRectTop, myRectRight, myRectBottom];
+
+% create a new response variable to store one response per stimulus
+response = double(1);
+
+for currentStimulus = 1:trial_number;
+    Randomizer = randperm(length(SOA));
+    SOA = SOA(Randomizer);% Randomize between two different ms time intervals
+    SOA_trial = SOA(1,1); % choose first cell of vector as value
+    % Store the trial and participant number into growing matrix
+    trial_row(currentStimulus,1)= participant_row;
+    trial_row(currentStimulus,2)= currentStimulus;
+    
+    % Set the default to randomly choose 1 or 2
+    default = randperm(2,1);
+    
+    % default first stimulus, if 1 then goes to the left, if 2 then goes to
+    % the right
+    if default < 2
+        myOval = [myOvalLeft - 300, myOvalTop, myOvalRight - 300, myOvalBottom]; % translates circle 300 pixels, first stimulus
+        myOval2 = [myOvalLeft + 300, myOvalTop, myOvalRight + 300, myOvalBottom]; % translates circle 300 pixels, second stimulus
+    else
+        myOval = [myOvalLeft + 300, myOvalTop, myOvalRight + 300, myOvalBottom];
+        myOval2 = [myOvalLeft - 300, myOvalTop, myOvalRight - 300, myOvalBottom];
+    end
+    
+    % Record whether 1 or 2 was chosen into growing matrix
+    trial_row(currentStimulus,3) = default;
+    % Record what the stimulus onset asynchrony was chosen to be for the
+    % trial
+    trial_row(currentStimulus,4) = SOA_trial;
+    % Wait some time so KbWait does not advance too quickly
+    WaitSecs(time_interval);
+    
+    % Draw circle to screen and fixation square
+    Screen('FillRect', wPtr, 0, myRect);
+    Screen('FillOval',wPtr,[255 0 0 ],myOval)
+    Screen('Flip',wPtr);
+    
+    
+    WaitSecs(SOA_trial); % Wait designated SOA
+    
+    
+    % Draw circle to screen
+    Screen('FillRect', wPtr, 0, myRect);
+    Screen('FillOval',wPtr,[255 0 0],myOval2)
+    Screen('Flip',wPtr);
+    
+    WaitSecs(time_interval); % Should I have this here?
+    
+    
+    % Time zero for reaction time
+    secs0 = GetSecs; % Citation: calculating RT by Rachel Cooper under 'Creating experiments using Matlab and Psychtoolbox' accessed November 17th 2015, can be found on: https://www.academia.edu/2614964/Creating_experiments_using_Matlab_and_Psychtoolbox
+    
+    Screen(wPtr,'FillRect',[ 255 255 255 255]);
+    Screen('Flip', wPtr);
+    
+    % Only look for key presses for the relevant keys
+    RestrictKeysForKbCheck([leftKey,rightKey, quitKey]);
+    
+    % Wait for keypress and release, only accurate to the nearest 5ms
+    KbWait;
+    
+    % Check what key was pressed
+    [keyIsDown, secs, keyCode] = KbCheck;% Citation: Rachel Cooper, accessed November 17th 2015, see full citation above. Modified, deleted deltasecs
+    
+    % Wait for key to be released, extremely important
+    KbReleaseWait;
+    
+    % Stores the user response associated with direction of stimulus, 7 =
+    % left, 8 = right, otherwise quit is pressed and error comes up
+    if keyCode(leftKey)
+        response = 1;
+    elseif keyCode(rightKey)
+        response = 2;
+    elseif keyCode(quitKey)
+        
+        Screen('CloseAll');
+        error('User hit the quit key');
+    end
+    
+    % Calculate reaction time
+    RT = secs - secs0; %Citation, for RT calculation as well: Rachel Cooper, accessed November 17th 2015, see full citation above
+    
+    % Assign responses (left or right keypress) into growing matrix
+    trial_row(currentStimulus,5) = response;
+    
+    % Record reaction time in matrix
+    trial_row(currentStimulus,6) = RT;
+    
+    
+end
+
+% Debrief message after experiment is complete
+debrief = 'The experiment is now over, press enter to quit back to Matlab.';
+
+% White screen with specified text values
+Screen('FillRect',wPtr,[ 255 255 255 255]); % Citation, text, restricting keys and screen: exampleExperiment.m by Dr. David Hunter
+Screen('TextFont',wPtr, 'Courier New');
+Screen('TextSize',wPtr, 14);
+Screen('TextStyle', wPtr, 1+2);
+DrawFormattedText(wPtr, debrief, 10, 20, [0 0 0 255], 40);
+
+% Bring screen from the back to the front so the participant can see it
+Screen('Flip', wPtr);
+
+% Restrict keypresses to the enter/return key, wait for keypress
+RestrictKeysForKbCheck(enterKey);
+KbWait
+
+% Close Psychtoolbox
+Screen('CloseAll')
+SOA_L_correct = zeros(trial_number,1);
+SOA_R_correct = zeros(trial_number,1);
+SOA_left = zeros(trial_number,1);
+SOA_right = zeros(trial_number,1);
+for x = 1:trial_number
+    if trial_row(x,3) == 1
+        SOA_left(x,1) = trial_row(x,3);
+    elseif trial_row(x,3) == 2
+        SOA_right(x,1) = trial_row(x,3);
+    end
+    if trial_row(x,3) == 1 && trial_row(x,5) == 1
+        SOA_L_correct(x,1) = trial_row(x,5);
+        
+        
+    elseif trial_row(x,3) ==2 && trial_row(x,5) == 2; % correct trials to the right
+        SOA_R_correct (x,1)= trial_row(x,5);
+        
+    end
+end
+
+left_probability = (sum(SOA_L_correct))/(sum(SOA_left));
+right_probability = (sum(SOA_R_correct))/(sum(SOA_right));
+
+%figure
+
+%ax1 = subplot (2,2,[1 1]);
+%scatter(SOA_L_correct,RT_L_correct)
+%xlabel('Time in ms for SOA to the left')
+%ylabel('RT to the left')
+%ax2 = subplot(2,2,[2 1]hel);
+%p = polyfit(SOA_L_correct,RT_L_correct,1);
+%f = polyval(p,SOA_L_correct);
+%hold on
+%plot(SOA_L_correct, RT_L_correct, '--g')
+%figure
+%scatter(SOA_L_incorrect,RT_R_incorrect)
+%xlabel('Time in ms for SOA to the left')
+%ylabel('RT to the right')
+%ax3= subplot(2,2,[1 2]);
+
+%figure
+%scatter(SOA_R_correct,RT_R_correct)
+%xlabel('Time in ms for SOA to the right')
+%ylabel('RT to the right')
+%ax4 = subplot(2,2,[2 2]);
+
+%figure
+%scatter(SOA_R_incorrect,RT_L_incorrect)
+%xlabel('Time in ms for SOA to the right')
+%ylabel('RT to the left')
+
+
+dlmwrite('BTD_Results.csv',trial_row,'delimiter', ',','-append');
 SOA = 0.005:0.001:0.15; % amount of ms range to sample from
 trial_row = zeros(trial_number,6);
 time_interval = 0.005;% Can be changed to suit specific experiment parameters
