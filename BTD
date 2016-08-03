@@ -145,7 +145,7 @@ SOA_R_correct = zeros(trial_number,1);
 SOA_left = zeros(trial_number,1);
 SOA_right = zeros(trial_number,1);
 for x = 1:trial_number
-    if trial_row(x,3) == 1
+    if trial_row(x,3) == 1 && trial_row(x,4) == 0% this needs to be by SOA as well 
         SOA_left(x,1) = trial_row(x,3);
     elseif trial_row(x,3) == 2
         SOA_right(x,1) = trial_row(x,3);
@@ -155,6 +155,17 @@ for x = 1:trial_number
     elseif trial_row(x,3) ==2 && trial_row(x,5) == 2; % correct trials to the right
         SOA_R_correct (x,1)= trial_row(x,5);
         
+    end
+    if trial_row(x,3) == 1 && trial_row(x,4) == 0 && trial_row(x,5) == 1
+        SOA_L_correct_1(x,1) = trial_row(x,5);
+    elseif trial_row(x,3) ==1 && trial_row(x,4) == 0.025 && trial_row(x,5) == 1% correct trials to the left for that specific SOA
+        SOA_L_correct_2(x,1)= trial_row(x,5);
+    elseif trial_row(x,3) == 1 && trial_row(x,4) == 0.050 && trial_row(x,5) == 1
+        SOA_L_correct_3(x,1)= trial_row(x,5);
+    elseif trial_row(x,3) == 1 && trial_row(x,4) == 0.075 && trial_row(x,5) == 1
+        SOA_L_correct_4(x,1)= trial_row(x,5);
+    elseif trial_row(x,3) == 1 && trial_row(x,4) == 0.100 && trial_row(x,5) == 1
+        SOA_L_correct_5(x,1)= trial_row(x,5);
     end
 end
 
