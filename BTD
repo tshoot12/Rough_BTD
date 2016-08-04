@@ -72,7 +72,7 @@ for currentStimulus = 1:trial_number;
         WaitSecs(time_interval);
         LED_off_far_left;
     end
-    LED_off_fixation; 
+    LED_off_fixation;
     % Record whether 1 or 2 was chosen into growing matrix
     trial_row(currentStimulus,3) = default;
     % Record what the stimulus onset asynchrony was chosen to be for the
@@ -140,37 +140,88 @@ KbWait
 
 % Close Psychtoolbox
 Screen('CloseAll')
-SOA_L_correct = zeros(trial_number,1);
-SOA_R_correct = zeros(trial_number,1);
-SOA_left = zeros(trial_number,1);
-SOA_right = zeros(trial_number,1);
+SOA_L_correct_0 = zeros(trial_number,1);
+SOA_L_correct_25 = zeros(trial_number,1);
+SOA_L_correct_50 = zeros(trial_number,1);
+SOA_L_correct_75 = zeros(trial_number,1);
+SOA_L_correct_100 = zeros(trial_number,1);
+SOA_left_0 = zeros(trial_number,1);
+SOA_left_25 = zeros(trial_number,1);
+SOA_left_50 = zeros(trial_number,1);
+SOA_left_75 = zeros(trial_number,1);
+SOA_left_100 = zeros(trial_number,1);
+%SOA_left = zeros(trial_number,1);
+SOA_right_0 = zeros(trial_number,1);
+SOA_right_25 = zeros(trial_number,1);
+SOA_right_50 = zeros(trial_number,1);
+SOA_right_75 = zeros(trial_number,1);
+SOA_right_100 = zeros(trial_number,1);
+SOA_R_correct_0 = zeros(trial_number,1);
+SOA_R_correct_25 = zeros(trial_number,1);
+SOA_R_correct_50 = zeros(trial_number,1);
+SOA_R_correct_75 = zeros(trial_number,1);
+SOA_R_correct_100 = zeros(trial_number,1);
 for x = 1:trial_number
-    if trial_row(x,3) == 1 && trial_row(x,4) == 0% this needs to be by SOA as well 
-        SOA_left(x,1) = trial_row(x,3);
-    elseif trial_row(x,3) == 2
-        SOA_right(x,1) = trial_row(x,3);
+    if trial_row(x,3) == 1 && trial_row(x,4) == 0% this needs to be by SOA as well
+        SOA_left_0(x,1) = trial_row(x,3);
+    elseif trial_row(x,3) ==1 && trial_row(x,4) == 0.025
+        SOA_left_25(x,1)= trial_row(x,3);
+    elseif trial_row(x,3) == 1 && trial_row(x,4) == 0.050
+        SOA_left_50(x,1)= trial_row(x,5);
+    elseif trial_row(x,3) == 1 && trial_row(x,4) == 0.075
+        SOA_left_75(x,1)= trial_row(x,5);
+    elseif trial_row(x,3) == 1 && trial_row(x,4) == 0.100
+        SOA_left_100(x,1)= trial_row(x,5);
+    elseif trial_row(x,3) == 2 && trial_row(x,4) == 0
+        SOA_right_0(x,1) = trial_row(x,3);
+    elseif trial_row(x,3) == 2 && trial_row(x,4) == 0.025
+        SOA_right_25(x,1) = trial_row(x,3);
+    elseif trial_row(x,3) == 2 && trial_row(x,4) == 0.050
+        SOA_right_50(x,1) = trial_row(x,3);
+    elseif trial_row(x,3) == 2 && trial_row(x,4) == 0.75
+        SOA_right_75(x,1) = trial_row(x,3);
+    elseif trial_row(x,3) == 2 && trial_row(x,4) == 0.100
+        SOA_right_100(x,1) = trial_row(x,3);
     end
-    if trial_row(x,3) == 1 && trial_row(x,5) == 1
-        SOA_L_correct(x,1) = trial_row(x,5);
-    elseif trial_row(x,3) ==2 && trial_row(x,5) == 2; % correct trials to the right
-        SOA_R_correct (x,1)= trial_row(x,5);
-        
-    end
+    %if trial_row(x,3) == 1 && trial_row(x,5) == 1
+    %  SOA_L_correct(x,1) = trial_row(x,5);
+    % elseif trial_row(x,3) ==2 && trial_row(x,5) == 2; % correct trials to the right
+    %    SOA_R_correct (x,1)= trial_row(x,5);
+    
+    %end
     if trial_row(x,3) == 1 && trial_row(x,4) == 0 && trial_row(x,5) == 1
-        SOA_L_correct_1(x,1) = trial_row(x,5);
+        SOA_L_correct_0(x,1) = trial_row(x,5);
     elseif trial_row(x,3) ==1 && trial_row(x,4) == 0.025 && trial_row(x,5) == 1% correct trials to the left for that specific SOA
-        SOA_L_correct_2(x,1)= trial_row(x,5);
+        SOA_L_correct_25(x,1)= trial_row(x,5);
     elseif trial_row(x,3) == 1 && trial_row(x,4) == 0.050 && trial_row(x,5) == 1
-        SOA_L_correct_3(x,1)= trial_row(x,5);
+        SOA_L_correct_50(x,1)= trial_row(x,5);
     elseif trial_row(x,3) == 1 && trial_row(x,4) == 0.075 && trial_row(x,5) == 1
-        SOA_L_correct_4(x,1)= trial_row(x,5);
+        SOA_L_correct_75(x,1)= trial_row(x,5);
     elseif trial_row(x,3) == 1 && trial_row(x,4) == 0.100 && trial_row(x,5) == 1
-        SOA_L_correct_5(x,1)= trial_row(x,5);
+        SOA_L_correct_100(x,1)= trial_row(x,5);
+    elseif trial_row(x,3) == 2 && trial_row(x,4) == 0 && trial_row(x,5) == 2
+        SOA_R_correct_0(x,1) = trial_row(x,5);
+    elseif trial_row(x,3) ==2 && trial_row(x,4) == 0.025 && trial_row(x,5) == 2% correct trials to the left for that specific SOA
+        SOA_R_correct_25(x,1)= trial_row(x,5);
+    elseif trial_row(x,3) == 2 && trial_row(x,4) == 0.050 && trial_row(x,5) == 2
+        SOA_R_correct_50(x,1)= trial_row(x,5);
+    elseif trial_row(x,3) == 2 && trial_row(x,4) == 0.075 && trial_row(x,5) == 2
+        SOA_R_correct_75(x,1)= trial_row(x,5);
+    elseif trial_row(x,3) == 2 && trial_row(x,4) == 0.100 && trial_row(x,5) == 2
+        SOA_R_correct_100(x,1)= trial_row(x,5);
     end
 end
 
-left_probability = (sum(SOA_L_correct))/(sum(SOA_left)); % probability of clicking left if the stim appeared to the left
-right_probability = (sum(SOA_R_correct))/(sum(SOA_right)); % probability of clicking right if the stim was to the right
+left_probability_0 = (sum(SOA_L_correct_0))/(sum(SOA_left_0)); % probability of clicking left if the stim appeared to the left
+left_probability_25 = (sum(SOA_L_correct_25))/(sum(SOA_left_25)); % probability of clicking left if the stim appeared to the left
+left_probability_50 = (sum(SOA_L_correct_50))/(sum(SOA_left_50)); % probability of clicking left if the stim appeared to the left
+left_probability_75 = (sum(SOA_L_correct_75))/(sum(SOA_left_75)); % probability of clicking left if the stim appeared to the left
+left_probability_100 = (sum(SOA_L_correct_100))/(sum(SOA_left_100)); % probability of clicking left if the stim appeared to the left
+right_probability_0 = (sum(SOA_R_correct_0))/(sum(SOA_right_0)); % probability of clicking right if the stim was to the right
+right_probability_25 = (sum(SOA_R_correct_25))/(sum(SOA_right_25)); % probability of clicking left if the stim appeared to the left
+right_probability_50 = (sum(SOA_R_correct_50))/(sum(SOA_right_50)); % probability of clicking left if the stim appeared to the left
+right_probability_75 = (sum(SOA_R_correct_75))/(sum(SOA_right_75)); % probability of clicking left if the stim appeared to the left
+right_probability_100 = (sum(SOA_R_correct_100))/(sum(SOA_right_100)); % probability of clicking left if the stim appeared to the left
 
 %figure
 
